@@ -226,3 +226,97 @@
 .case-monitoring-list--last .case-monitoring-item:last-child {
   border-bottom: 0;
 }
+
+/* =========================================
+   Case progress milestones (inside .case-header)
+   ========================================= */
+
+.case-progress {
+  max-width: 100%;
+}
+
+/* The horizontal track */
+.case-progress__list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Track line */
+.case-progress__list::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  height: 2px;
+  background: #ffffff;
+}
+
+/* Each milestone */
+.case-progress__item {
+  flex: 1 1 0;
+  text-align: center;
+  position: relative;
+  font-size: 14px;
+}
+
+/* Label and meta (date / dash) */
+.case-progress__label {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.case-progress__meta {
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+/* Dot at the bottom of each milestone */
+.case-progress__dot {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #b1b4b6;
+  background: #f3f2f1;
+}
+
+/* Completed steps: solid dot */
+.case-progress__item--complete .case-progress__dot {
+  background: #b1b4b6;
+}
+
+/* Current step: double ring effect */
+.case-progress__item--current .case-progress__dot {
+  background: #ffffff;
+  border-color: #0b0c0c;
+}
+
+.case-progress__item--current .case-progress__dot::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: #0b0c0c;
+}
+
+/* Upcoming: leave as pale outline (default) */
+
+/* Small-screen tweaks */
+@media (max-width: 40.0625em) {
+  .case-progress__label {
+    font-size: 13px;
+  }
+
+  .case-progress__meta {
+    font-size: 11px;
+  }
+}
+
