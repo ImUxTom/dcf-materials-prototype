@@ -657,24 +657,36 @@
     // Future: inspect meta.Material / classification and filter MATERIAL_ACTIONS here
     var itemsHTML = MATERIAL_ACTIONS.map(function (a) {
       return (
-        '<button type="button"' +
-          ' class="govuk-button moj-button-menu__item govuk-button--secondary"' +
-          ' data-module="govuk-button"' +
-          ' data-action="' + esc(a.id) + '"' +
-        '>' +
-          esc(a.label) +
-        '</button>'
+        '<li class="moj-button-menu__item" role="none">' +
+          '<a href="#"' +
+            ' role="menuitem"' +
+            ' class="moj-button-menu__link"' +
+            ' data-action="' + esc(a.id) + '"' +
+          '>' +
+            esc(a.label) +
+          '</a>' +
+        '</li>'
       )
     }).join('')
 
     return (
       '<div class="dcf-meta-inline-actions">' +
-        '<div class="moj-button-menu" data-module="moj-button-menu" data-button-text="Material actions">' +
-          itemsHTML +
+        '<div class="moj-button-menu" data-module="moj-button-menu">' +
+          '<button type="button"' +
+            ' class="govuk-button govuk-button--secondary moj-button-menu__toggle"' +
+            ' aria-haspopup="true" aria-expanded="false">' +
+            'Material actions <span class="moj-button-menu__icon" aria-hidden="true">▾</span>' +
+          '</button>' +
+          '<div class="moj-button-menu__wrapper" hidden>' +
+            '<ul class="moj-button-menu__list" role="menu">' +
+              itemsHTML +
+            '</ul>' +
+          '</div>' +
         '</div>' +
       '</div>'
     )
   }
+
 
   // --------------------------------------
   // Meta panel builder
