@@ -1,6 +1,38 @@
-{# Top progress / stages area. Replace with real component later #}
+{# _includes/case/details/progress-panel.njk #}
+
+{# Optional data passed in from the route; falls back to 5 standard stages #}
+{% set steps = steps or [
+  { id: "charge",        label: "Charge",        date: null,          status: "complete" },
+  { id: "disclosure",    label: "Disclosure",    date: null,          status: "complete" },
+  { id: "first-hearing", label: "First Hearing", date: null,          status: "complete" },
+  { id: "ptph-trial",    label: "PTPH / Trial",  date: null,          status: "current" },
+  { id: "sentence",      label: "Sentence",      date: null,          status: "upcoming" }
+] %}
+
 <div class="case-header">
-  <span class="govuk-body-s">
-    Progress bar area (Charge → Sentence)
-  </span>
+  <div class="case-progress" role="group" aria-label="Case progress">
+    <ol class="case-progress__list">
+      {% for step in steps %}
+        {% set status = step.status or "upcoming" %}
+        <li class="case-progress__item case-progress__item--{{ status }}">
+          <div class="case-progress__label">
+            {{ step.label }}
+          </div>
+
+          <div class="case-progress__meta">
+            {% if step.date %}
+              <span class="case-progress__date">
+                {{ step.date }}
+              </span>
+            {% else %}
+              <span aria-hidden="true"> </span>
+              <span class="govuk-visually-hidden">No date set</span>
+            {% endif %}
+          </div>
+
+          <div class="case-progress__dot" aria-hidden="true"></div>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
 </div>
