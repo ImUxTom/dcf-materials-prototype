@@ -246,24 +246,68 @@
 .dcf-ops-icon { display: inline-flex; align-items: center; line-height: 0; }
 .dcf-ops-icon img { display: block; width: 20px; height: 20px; }
 
-/* dropdown menu panel */
-.dcf-viewer__ops-bar .moj-button-menu { position: relative; }
-.dcf-viewer__ops-bar .moj-button-menu__wrapper[hidden] { display: none !important; }
-.dcf-viewer__ops-bar .moj-button-menu__wrapper {
+/* dropdown menu panel – shared by ops bar + meta inline actions */
+.dcf-viewer__ops-bar .moj-button-menu,
+.dcf-meta-inline-actions .moj-button-menu {
+  position: relative;
+}
+
+/* honour [hidden] in both places */
+.dcf-viewer__ops-bar .moj-button-menu__wrapper[hidden],
+.dcf-meta-inline-actions .moj-button-menu__wrapper[hidden] {
+  display: none !important;
+}
+
+/* base dropdown panel positioning */
+.dcf-viewer__ops-bar .moj-button-menu__wrapper,
+.dcf-meta-inline-actions .moj-button-menu__wrapper {
   position: absolute;
-  right: 0; top: 100%;
+  top: 100%;
   margin-top: 6px;
-  background: #fff; color: #0b0c0c;
-  border: 1px solid #b1b4b6; border-radius: 2px;
+  background: #fff;
+  color: #0b0c0c;
+  border: 1px solid #b1b4b6;
+  border-radius: 2px;
   box-shadow: 0 2px 6px rgba(0,0,0,.15);
-  z-index: 20; /* above PDF viewer */
+  z-index: 20;
 }
-.dcf-viewer__ops-bar .moj-button-menu__list { list-style: none; margin: 0; padding: 4px; }
-.dcf-viewer__ops-bar .moj-button-menu__item { margin: 0; }
-.dcf-viewer__ops-bar .moj-button-menu__link {
-  display: block; padding: 8px 12px; text-decoration: none; color: #0b0c0c;
+
+/* ops bar menu aligns to the right */
+.dcf-viewer__ops-bar .moj-button-menu__wrapper {
+  right: 0;
 }
-.dcf-viewer__ops-bar .moj-button-menu__link:hover { background: #f3f2f1; }
+
+/* meta inline menu aligns to the left of the yellow button */
+.dcf-meta-inline-actions .moj-button-menu__wrapper {
+  left: 0;
+}
+
+/* shared list + item styles */
+.dcf-viewer__ops-bar .moj-button-menu__list,
+.dcf-meta-inline-actions .moj-button-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.dcf-viewer__ops-bar .moj-button-menu__item,
+.dcf-meta-inline-actions .moj-button-menu__item {
+  margin: 0;
+}
+
+.dcf-viewer__ops-bar .moj-button-menu__link,
+.dcf-meta-inline-actions .moj-button-menu__link {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #0b0c0c;
+}
+
+.dcf-viewer__ops-bar .moj-button-menu__link:hover,
+.dcf-meta-inline-actions .moj-button-menu__link:hover {
+  background: #f3f2f1;
+}
+
 
 /* ----------------------------------------------------------------------
    META BODY + INLINE ACTIONS

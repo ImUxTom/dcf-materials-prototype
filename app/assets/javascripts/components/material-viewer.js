@@ -133,7 +133,6 @@
     openNotesModal(trigger)
   })
 
-
   // Close the notes tray with Esc when it's open.
   document.addEventListener('keydown', function (e) {
     if (!isNotesOpen()) return
@@ -577,7 +576,7 @@
       } else {
         data.materialStatus = status
       }
-      try { tag.textContent = JSON.stringify(data) } catch (e) {}
+      try { tag.textContent = JSON.stringify(data) } catch (e) { /* ignore */ }
     }
 
     // Update visible badge on the card (we keep rawStatus for fallback text-only rendering)
@@ -636,6 +635,58 @@
     if (readItem) readItem.closest('li').hidden = isRead
     if (unreadItem) unreadItem.closest('li').hidden = !isRead
   }
+
+  // --------------------------------------
+  // Material actions (MoJ inline menu in meta)
+  // --------------------------------------
+  var MATERIAL_ACTIONS = [
+    { id: 'assess-unused',               label: 'Assess as unused' },
+    { id: 'assess-disclosable',         label: 'Assess as disclosable' },
+    { id: 'assess-disclosable-inspect', label: 'Assess as disclosable by inspection' },
+    { id: 'assess-not-disclosable',     label: 'Assess as not disclosable' },
+    { id: 'assess-clearly-not',         label: 'Assess as clearly not disclosable' },
+    { id: 'assess-evidence',            label: 'Assess as evidence' },
+    { id: 'dispute-sensitivity',        label: 'Dispute sensitivity' },
+    { id: 'request-updated-description',label: 'Request updated description' },
+    { id: 'request-material',           label: 'Request material' },
+    { id: 'generate-cps-docs',          label: 'Generate CPS documents' }
+  ]
+
+  // Build the MoJ button menu HTML for the meta-inline-actions area
+  function buildInlineActionsMenu (meta) {
+    // Future: inspect meta.Material / classification and filter MATERIAL_ACTIONS here
+    var itemsHTML = MATERIAL_ACTIONS.map(function (a) {
+      return (
+        '<li class="moj-button-menu__item" role="none">' +
+          '<a href="#"' +
+            ' role="menuitem"' +
+            ' class="moj-button-menu__link"' +
+            ' data-action="' + esc(a.id) + '"' +
+          '>' +
+            esc(a.label) +
+          '</a>' +
+        '</li>'
+      )
+    }).join('')
+
+    return (
+      '<div class="dcf-meta-inline-actions">' +
+        '<div class="moj-button-menu" data-module="moj-button-menu">' +
+          '<button type="button"' +
+            ' class="govuk-button govuk-button--secondary moj-button-menu__toggle"' +
+            ' aria-haspopup="true" aria-expanded="false">' +
+            'Material actions <span class="moj-button-menu__icon" aria-hidden="true">▾</span>' +
+          '</button>' +
+          '<div class="moj-button-menu__wrapper" hidden>' +
+            '<ul class="moj-button-menu__list" role="menu">' +
+              itemsHTML +
+            '</ul>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    )
+  }
+
 
   // --------------------------------------
   // Meta panel builder
@@ -769,11 +820,7 @@
         '</div>' +
       '</div>'
 
-
-    var inlineActions =
-      '<div class="dcf-meta-inline-actions">' +
-        '<a href="#" class="govuk-button govuk-button--primary dcf-meta-secondary" data-action="reclassify">Assess as unused</a>' +
-      '</div>'
+    var inlineActions = buildInlineActionsMenu(meta)
 
     return '' +
       '<div class="dcf-viewer__meta" data-meta-root>' +
@@ -937,7 +984,8 @@
       return
     }
 
-    var a = e.target.closest('a[data-action]')
+    // Handle any element with a [data-action] attribute (anchors or buttons)
+    var a = e.target.closest('[data-action]')
     if (!a) return
     e.preventDefault()
 
@@ -986,7 +1034,7 @@
     if (action === 'back-to-search') {
       // Only do anything if we have stored search HTML (set by material-search.js)
       if (viewer._lastSearchHTML) {
-        // *** CHANGED: remember the current document view so we can come back to it
+        // remember the current document view so we can come back to it
         viewer._lastDocumentHTML = viewer.innerHTML
 
         viewer.dataset.mode = 'search'
@@ -1008,7 +1056,6 @@
       }
       return
     }
-
 
     // Show/hide the meta details panel (robust to id drift)
     if (action === 'toggle-meta') {
@@ -1039,7 +1086,7 @@
       return
     }
 
-    // “Mark as read” from the Document actions menu
+    // “Mark as read” from the Document actions menu (ops bar)
     if (action === 'mark-read') {
       // find the card that opened the viewer (preferred), or fall back to the active card
       var card =
@@ -1070,7 +1117,7 @@
       return
     }
 
-    // “Mark as unread” from the Document actions menu
+    // “Mark as unread” from the Document actions menu (ops bar)
     if (action === 'mark-unread') {
       var card2 =
         (viewer && viewer._currentCard) ||
@@ -1100,15 +1147,57 @@
       return
     }
 
-    // Placeholder for future behaviour
-    if (action === 'reclassify') {
-      console.log('Reclassify clicked')
+    // ----------------------------------
+    // Material assessment & request actions (inline MoJ menu in meta)
+    // ----------------------------------
+    if ([
+      'assess-unused',
+      'assess-disclosable',
+      'assess-disclosable-inspect',
+      'assess-not-disclosable',
+      'assess-clearly-not',
+      'assess-evidence',
+      'dispute-sensitivity',
+      'request-updated-description',
+      'request-material',
+      'generate-cps-docs'
+    ].indexOf(action) !== -1) {
+
+      // The currently active/previewed card
+      var currentCard =
+        (viewer && viewer._currentCard) ||
+        viewer.querySelector('.dcf-material-card--active') ||
+        document.querySelector('.dcf-material-card--active') ||
+        null
+
+      console.log('Material action:', action, 'on card:', currentCard)
+
+      // TODO: plug in real behaviour per action
+      // Example:
+      // if (action === 'assess-unused') {
+      //   setMaterialStatus(currentCard, 'Unused')
+      // }
+
+      // If the action came from inside a MoJ button-menu, politely close it
+      var menuFromAction = a.closest('.moj-button-menu')
+      if (menuFromAction) {
+        // The inline meta menu uses the "simple" pattern (no toggle wrapper),
+        // so only close if there is a wrapper+toggle present.
+        var wrapperInline = menuFromAction.querySelector('.moj-button-menu__wrapper')
+        var toggleInline  = menuFromAction.querySelector('.moj-button-menu__toggle')
+        if (wrapperInline && toggleInline) {
+          wrapperInline.hidden = true
+          toggleInline.setAttribute('aria-expanded', 'false')
+          toggleInline.focus()
+        }
+      }
+
       return
     }
 
-    // Placeholder for future behaviour (duplicate kept as in original)
-    if (action === 'reclassify') {
-      console.log('Reclassify clicked')
+    // Placeholder for future behaviour
+    if (action === 'ops-icon') {
+      console.log('Ops icon clicked')
       return
     }
   }, false)
@@ -1122,7 +1211,7 @@
 
     e.preventDefault()
 
-    // *** CHANGED: restore the last document viewer HTML if we have it
+    // restore the last document viewer HTML if we have it
     if (viewer._lastDocumentHTML) {
       viewer.innerHTML = viewer._lastDocumentHTML
       viewer.hidden = false
