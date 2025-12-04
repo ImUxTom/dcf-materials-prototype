@@ -1,5 +1,10 @@
 {# _includes/task/main-tabs.njk #}
 
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> upstream/main
 {# -----------------------------
    Tasks tab content
    ----------------------------- #}
@@ -73,10 +78,17 @@
   {% if tasks.length %}
     <div class="app-list">
       {% for task in tasks %}
+<<<<<<< HEAD
+        {# Show group heading when group changes or on first task #}
+        {# {% if loop.first or task.groupKey != tasks[loop.index0 - 1].groupKey %}
+          <h2 class="govuk-heading-m govuk-!-margin-top-7 govuk-!-margin-bottom-0">{{task.groupHeading}}</h2>
+        {% endif %}  #}
+=======
         {# Show group heading when group changes or on first task
         {% if loop.first or task.groupKey != tasks[loop.index0 - 1].groupKey %}
           <h2 class="govuk-heading-m govuk-!-margin-top-7 govuk-!-margin-bottom-0">{{task.groupHeading}}</h2>
         {% endif %} #}
+>>>>>>> upstream/main
 
         <div class="app-list__item">
           {% set taskNameDisplay %}
@@ -91,11 +103,19 @@
 
             <div class="app-list__tag">
               {# {{ govukTag({ text: task.severity, classes: task.severity | severityTagClass })}} #}
+<<<<<<< HEAD
+              {# {% if task.isUrgent %}
+                {{ govukTag({ text: 'Urgent', classes: 'govuk-tag--red govuk-!-margin-left-' })}}
+              {% endif %} #}
+            </div>
+          
+=======
               {% if task.isUrgent %}
                 {{ govukTag({ text: 'Urgent', classes: 'govuk-tag--red govuk-!-margin-left-' })}}
               {% endif %}
             </div>
           </h3>
+>>>>>>> upstream/main
 
           {% set defendantsValue %}
             {{task.case.defendants[0].firstName}} {{task.case.defendants[0].lastName}}
@@ -121,10 +141,40 @@
             {% endif %}
           {% endset %}
 
+<<<<<<< HEAD
+          {# -----------------------------
+            Wrap the case reference in a link
+            ----------------------------- #}
+          {% set caseRefLink %}
+            <a href="/cases/{{ task.case.id }}/details"
+              class="govuk-link govuk-link--no-visited-state">
+              {{ task.case.reference }}
+            </a>
+          {% endset %}
+
+=======
+>>>>>>> upstream/main
           {{ govukSummaryList({
             classes: 'govuk-summary-list--no-border app-summary-list--compact app-summary-list--small-text',
             rows: [
               {
+<<<<<<< HEAD
+                key:   { text: 'Case reference number' },
+                value: { html: caseRefLink }
+              },
+              {
+                key:   { text: 'Defendant' },
+                value: { html: defendantsValue }
+              },
+              {
+                key:   { text: 'Due date' },
+                value: { html: dueDateValue }
+              }
+            ]
+          }) }}
+
+
+=======
                 key: { text: 'Case reference number' },
                 value: { html: task.case.reference }
               },
@@ -197,6 +247,7 @@
               } if task.case.hearings and task.case.hearings.length > 0
             ]
           })}}
+>>>>>>> upstream/main
         </div>
       {% endfor %}
     </div>
