@@ -1,5 +1,7 @@
 {% extends "layouts/main.html" %}
 
+{% set bodyClasses = "dcf-materials-wide" %}
+
 {% set navId = 'tasks' %}
 {% set pageName = "Tasks (:total)" | replace(':total', totalTasks | formatNumber) %}
 

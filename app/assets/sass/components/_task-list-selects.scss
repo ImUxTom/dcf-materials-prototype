@@ -1,0 +1,24 @@
+/* Task filters under tabs */
+.app-task-filters {
+  margin-bottom: 16px;
+}
+
+/* Make each select fill its quarter nicely */
+.app-task-filters .govuk-grid-column-one-quarter {
+  padding-right: 16px;          /* little gap between columns */
+}
+
+.app-task-filters .govuk-grid-column-one-quarter:last-child {
+  padding-right: 0;
+}
+
+/* Remove extra bottom space on form groups */
+.app-task-filters .govuk-form-group {
+  margin-bottom: 0;
+}
+
+/* Make the dropdowns fill the column width */
+.app-task-filters .govuk-select {
+  width: 100%;
+  max-width: 100%;
+}

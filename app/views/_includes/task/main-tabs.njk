@@ -4,6 +4,71 @@
    Tasks tab content
    ----------------------------- #}
 {% set tasksHtml %}
+
+  {# Filters row under the tabs #}
+  <div class="govuk-grid-row govuk-!-margin-bottom-4 app-task-filters">
+    <div class="govuk-grid-column-one-quarter">
+      {{ govukSelect({
+        id: "filter-urn-or-defendant",
+        name: "filter-urn-or-defendant",
+        label: {
+          text: "URN or defendant surname"
+        },
+        items: [
+          { value: "", text: "All", selected: true },
+          { value: "urn-1", text: "Example URN 1" },
+          { value: "urn-2", text: "Example URN 2" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-one-quarter">
+      {{ govukSelect({
+        id: "filter-unit-group",
+        name: "filter-unit-group",
+        label: {
+          text: "Unit group"
+        },
+        items: [
+          { value: "", text: "All unit groups", selected: true },
+          { value: "group-a", text: "Group A" },
+          { value: "group-b", text: "Group B" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-one-quarter">
+      {{ govukSelect({
+        id: "filter-unit",
+        name: "filter-unit",
+        label: {
+          text: "Unit"
+        },
+        items: [
+          { value: "", text: "All units", selected: true },
+          { value: "unit-1", text: "Unit 1" },
+          { value: "unit-2", text: "Unit 2" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-one-quarter">
+      {{ govukSelect({
+        id: "filter-owner",
+        name: "filter-owner",
+        label: {
+          text: "Owner"
+        },
+        items: [
+          { value: "", text: "All owners", selected: true },
+          { value: "me", text: "Me" },
+          { value: "my-team", text: "My team" }
+        ]
+      }) }}
+    </div>
+  </div>
+
+  {# Task list beneath filters #}
   {% if tasks.length %}
     <div class="app-list">
       {% for task in tasks %}
