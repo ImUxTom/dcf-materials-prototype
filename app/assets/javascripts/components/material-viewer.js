@@ -176,6 +176,11 @@
         '<a href="#" class="govuk-link" data-action="close-viewer">Close documents</a>',
         '<span aria-hidden="true" class="govuk-!-margin-horizontal-2">&nbsp; | &nbsp;</span>',
         '<a href="#" class="govuk-link" data-action="toggle-full" aria-pressed="false">View document full width</a>',
+      '<div class="dcf-viewer__toolbar govuk-!-margin-bottom-4 govuk-body">',
+        // LEFT group
+        '<a href="#" class="govuk-link" data-action="close-viewer">Close documents</a>',
+        '<span aria-hidden="true" class="govuk-!-margin-horizontal-2">&nbsp; | &nbsp;</span>',
+        '<a href="#" class="govuk-link" data-action="toggle-full" aria-pressed="false">View document full width</a>',
 
         // RIGHT group
         '<span class="dcf-viewer__toolbar-right">',
@@ -184,7 +189,16 @@
           '<span class="dcf-viewer__navcluster" data-role="search-nav"></span>',
         '</span>',
       '</div>',
+        // RIGHT group
+        '<span class="dcf-viewer__toolbar-right">',
+          '<a href="#" class="govuk-link" data-action="back-to-search" hidden>Back to search results</a>',
+          '<span aria-hidden="true" class="govuk-!-margin-horizontal-2" data-role="back-to-search-sep" hidden>&nbsp; | &nbsp;</span>',
+          '<span class="dcf-viewer__navcluster" data-role="search-nav"></span>',
+        '</span>',
+      '</div>',
 
+      '<div id="dcf-viewer-tabs" class="dcf-viewer__tabs dcf-viewer__tabs--flush"></div>',
+      '<div class="dcf-viewer__meta" data-meta-root></div>',
       '<div id="dcf-viewer-tabs" class="dcf-viewer__tabs dcf-viewer__tabs--flush"></div>',
       '<div class="dcf-viewer__meta" data-meta-root></div>',
 
@@ -217,6 +231,8 @@
         '</div>',
       '</div>',
 
+      '<iframe class="dcf-viewer__frame" src="" title="Preview" loading="lazy" referrerpolicy="no-referrer"></iframe>'
+    ].join('')
       '<iframe class="dcf-viewer__frame" src="" title="Preview" loading="lazy" referrerpolicy="no-referrer"></iframe>'
     ].join('')
 
@@ -855,6 +871,7 @@
         '<div id="' + esc(bodyId) + '" class="dcf-viewer__meta-body" hidden>' +
           inlineActions +
           // Keeping your existing behaviour: materialRows appears twice
+          // Keeping your existing behaviour: materialRows appears twice
           sectionHTMLNoHeadingLocal(materialRows) +
           sectionHTMLNoHeadingLocal(materialRows) +
           sectionHTMLLocal('Related materials',      relatedRows)  +
@@ -952,6 +969,7 @@
   // --------------------------------------
 
   // Cards with explicit js-material-link (main materials list)
+  // Cards with explicit js-material-link (main materials list)
   document.addEventListener('click', function (e) {
     var link = e.target && e.target.closest('a.js-material-link[data-file-url]')
     if (!link) return
@@ -1024,6 +1042,8 @@
       e.preventDefault()
       var id2 = tabBtn.getAttribute('data-tab-id')
       if (id2) switchToTabById(id2)
+      var id2 = tabBtn.getAttribute('data-tab-id')
+      if (id2) switchToTabById(id2)
       return
     }
 
@@ -1085,6 +1105,10 @@
           var sepBack = s.querySelector('[data-role="back-to-documents-sep"]')
           if (linkBack) linkBack.hidden = false
           if (sepBack) sepBack.hidden = false
+          var linkBack = s.querySelector('a[data-action="back-to-documents"]')
+          var sepBack = s.querySelector('[data-role="back-to-documents-sep"]')
+          if (linkBack) linkBack.hidden = false
+          if (sepBack) sepBack.hidden = false
         }
       }
       return
@@ -1094,6 +1118,9 @@
       var metaWrap = a.closest('.dcf-viewer__meta')
       var body =
         (function () {
+          var id3 = a.getAttribute('aria-controls') || a.getAttribute('data-controls')
+          if (!metaWrap || !id3) return null
+          try { return metaWrap.querySelector('#' + CSS.escape(id3)) } catch (e) { return null }
           var id3 = a.getAttribute('aria-controls') || a.getAttribute('data-controls')
           if (!metaWrap || !id3) return null
           try { return metaWrap.querySelector('#' + CSS.escape(id3)) } catch (e) { return null }
