@@ -732,9 +732,14 @@ function buildMetaPanel (meta, bodyId) {
                 (meta && meta.Type) ||
                 ''
   var typeNorm = String(rawType).toLowerCase().trim()
+
   var isUnusedOrSensitive = (typeNorm === 'unused non-sensitive' || typeNorm === 'sensitive')
-  var isExhibit = (typeNorm === 'exhibit')
-  var isEvidence = isExhibit && (mat.isEvidence === true || mat.isEvidence === 'true')
+  var isExhibit   = (typeNorm === 'exhibit')
+  var isStatement = (typeNorm === 'statement')
+
+  // Any material (statement or exhibit) can be explicitly flagged as evidence
+  var isEvidence = (mat.isEvidence === true || mat.isEvidence === 'true')
+
 
   // Disclosure objects
   var pol = (mat && mat.policeDisclosure) ||
@@ -747,12 +752,14 @@ function buildMetaPanel (meta, bodyId) {
             {}
 
   // When to show sections
-  var hasPoliceSection = isUnusedOrSensitive || isExhibit
+  // - Statements and Exhibits: compact Police block only
+  // - Unused / Sensitive: full Police + CPS blocks
+  var hasPoliceSection = isUnusedOrSensitive || isExhibit || isStatement
 
-  // For now we ONLY show CPS for unused / sensitive material.
-  // Exhibits are always treated as evidence and CPS challenge/override
-  // flows will come later.
+  // For now, CPS appears only for unused / sensitive material.
+  // (We’ll introduce Statement/Exhibit challenge flows later.)
   var hasCpsSection = isUnusedOrSensitive
+
 
   // If/when you want CPS to appear for Exhibits, you can switch to:
   // var hasCpsSection =
@@ -909,13 +916,22 @@ function buildMetaPanel (meta, bodyId) {
   var policeRows = ''
   var cpsRows = ''
 
-   if (hasPoliceSection) {
-    if (isExhibit) {
+  if (hasPoliceSection) {
+    if (isExhibit || isStatement) {
+      // Compact block for Statements & Exhibits
       policeRows = rowsHTMLLocal(pol, [
         {
-          key: 'status',
           label: 'Police disclosure status',
-          render: function (v) { return statusTagHTML('police', v) }
+          // Ensure we always get a value, even if pol.status is missing,
+          // and override to "Evidence" when isEvidence is true.
+          get: function (obj) {
+            var raw = obj && obj.status
+            if ((raw == null || raw === '') && isEvidence) return 'Evidence'
+            return raw
+          },
+          render: function (v) {
+            return statusTagHTML('police', v)
+          }
         },
         { key: 'InspectedBy', label: 'Inspected by' },
         { key: 'inspectedOn', label: 'Inspected on' }
@@ -938,6 +954,7 @@ function buildMetaPanel (meta, bodyId) {
       ])
     }
   }
+
 
   if (hasCpsSection) {
     cpsRows = rowsHTMLLocal(cps, [
