@@ -4,6 +4,7 @@
   "Material": [
     {
       "Type": "Statement",
+      "isEvidence": true,
       "materialStatus": "New",
       "myFileUrl": "/public/files/stmt_BLAYNEE_2034_1_JUNE_mg11.pdf",
       "ItemId": "MAT-02001",
@@ -18,10 +19,20 @@
       "Incident": "Theft and common assault at High Street Store",
       "Location": "22 Larkspur Road, Leeds LS7 3QD",
       "PeriodFrom": "2025-09-14T09:10:00Z",
-      "PeriodTo": "2025-09-14T09:25:00Z"
+      "PeriodTo": "2025-09-14T09:25:00Z",
+      "policeDisclosure": {
+        "status": "Evidence",
+        "rationale": "Statement sets out the complainant’s account of the theft and common assault and is relied upon as core evidence.",
+        "rebuttable": null,
+        "exception": null,
+        "exceptionReason": null,
+        "inspectedOn": "19/09/2025",
+        "InspectedBy": "DC Alex Morton"
+      }
     },
     {
       "Type": "Statement",
+      "isEvidence": true,
       "materialStatus": "New",
       "myFileUrl": "/public/files/stmt_Lucy_Doyle_MG11.pdf",
       "ItemId": "MAT-02002",
@@ -36,10 +47,20 @@
       "Incident": "Altercation at the car park outside Greenway Shopping Centre",
       "Location": "Greenway Shopping Centre, Sheffield S11 8QF",
       "PeriodFrom": "2025-10-17T19:45:00Z",
-      "PeriodTo": "2025-10-17T20:10:00Z"
+      "PeriodTo": "2025-10-17T20:10:00Z",
+      "policeDisclosure": {
+        "status": "Evidence",
+        "rationale": "Statement provides a first-hand witness account of events in the car park and is relied upon to support the prosecution case.",
+        "rebuttable": null,
+        "exception": null,
+        "exceptionReason": null,
+        "inspectedOn": "22/10/2025",
+        "InspectedBy": "DC Priya Shah"
+      }
     },
     {
       "Type": "Statement",
+      "isEvidence": true,
       "materialStatus": "New",
       "myFileUrl": "/public/files/stmt_Shelagh_McLove_MG11.pdf",
       "ItemId": "MAT-02003",
@@ -54,7 +75,16 @@
       "Incident": "Incident timeline and stock loss description",
       "Location": "4 Kingfisher Way, Bristol BS3 2HD",
       "PeriodFrom": "2025-09-15T13:00:00Z",
-      "PeriodTo": "2025-09-15T13:45:00Z"
+      "PeriodTo": "2025-09-15T13:45:00Z",
+      "policeDisclosure": {
+        "status": "Evidence",
+        "rationale": "Management statement summarises incident timeline and stock loss and is relied upon to establish the circumstances of the offence.",
+        "rebuttable": null,
+        "exception": null,
+        "exceptionReason": null,
+        "inspectedOn": "24/09/2025",
+        "InspectedBy": "DS Clare Jennings"
+      }
     },
     {
       "Type": "Exhibit",
