@@ -203,8 +203,6 @@
             '<div class="moj-button-menu__wrapper" hidden>',
               '<ul class="moj-button-menu__list" role="menu">',
                 '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link">Log an under or over redaction</a></li>',
-                '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link">View redaction log history</a></li>',
-                '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link">Turn on potential redactions</a></li>',
                 '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link">Rotate pages</a></li>',
                 '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link">Discard pages</a></li>',
                 '<li class="moj-button-menu__item" role="none"><a role="menuitem" href="#" class="moj-button-menu__link" data-action="mark-read">Mark as read</a></li>',
@@ -294,7 +292,7 @@
       btn.setAttribute('role', 'tab')
       btn.setAttribute('aria-selected', 'false')
       btn.setAttribute('data-tab-id', id)
-      btn.setAttribute('data-item-id', (meta && meta.ItemId) || '')
+      btn.setAttribute('data-item-id', (meta && (meta.ItemId || (meta.Material && meta.Material.ItemId))) || '')
       btn.setAttribute('data-url', url || '')
       btn.setAttribute('data-title', title || 'Document')
       btn.title = title || 'Document'
@@ -701,7 +699,7 @@
     return (
       '<div class="dcf-meta-inline-actions">' +
         '<div class="moj-button-menu" data-module="moj-button-menu">' +
-          '<button type="button" class="govuk-button govuk-button--secondary moj-button-menu__toggle" aria-haspopup="true" aria-expanded="false">' +
+          '<button type="button" class="govuk-button govuk-button--primary moj-button-menu__toggle" aria-haspopup="true" aria-expanded="false">' +
             'Material actions <span class="moj-button-menu__icon" aria-hidden="true">▾</span>' +
           '</button>' +
           '<div class="moj-button-menu__wrapper" hidden>' +
@@ -718,150 +716,293 @@
   // Meta panel builder
   // --------------------------------------
 
-  function buildMetaPanel (meta, bodyId) {
-    var mat = (meta && meta.Material) || {}
-    var rel = (meta && meta.RelatedMaterials) || {}
-    var dig = (meta && meta.DigitalRepresentation) || {}
-    var pol = (meta && meta.PoliceMaterial) || {}
-    var cps = (meta && meta.CPSMaterial) || {}
-    var insp = pol.Inspection || {}
+function buildMetaPanel (meta, bodyId) {
+  // Meta may either be a flat material object, or { Material: { ... } }
+  var mat = (meta && meta.Material) || meta || {}
 
-    function rowsHTMLLocal (obj, mapping) {
-      return mapping.map(function (m) {
-        var v = (m.get ? m.get(obj) : obj && obj[m.key])
-        if (v == null || v === '' || (Array.isArray(v) && v.length === 0)) return ''
-        var valHTML = (m.render ? m.render(v) : esc(v))
-        return (
-          '<div class="govuk-summary-list__row">' +
-            '<dt class="govuk-summary-list__key">' + esc(m.label) + '</dt>' +
-            '<dd class="govuk-summary-list__value">' + valHTML + '</dd>' +
-          '</div>'
-        )
-      }).join('')
+  // Related / digital structures
+  var rel = (meta && meta.RelatedMaterials) || {}
+  var dig = (meta && meta.DigitalRepresentation) || {}
+
+  // Detect type – use shared helper so behaviour matches actions menu etc.
+  var rawType = getMaterialTypeFromMeta(meta || mat) ||
+                mat.Type ||
+                (meta && meta.Type) ||
+                ''
+  var typeNorm = String(rawType).toLowerCase().trim()
+
+  var isUnusedOrSensitive = (typeNorm === 'unused non-sensitive' || typeNorm === 'sensitive')
+  var isExhibit   = (typeNorm === 'exhibit')
+  var isStatement = (typeNorm === 'statement')
+
+  // Any material (statement or exhibit) can be explicitly flagged as evidence
+  var isEvidence = (mat.isEvidence === true || mat.isEvidence === 'true')
+
+
+  // Disclosure objects
+  var pol = (mat && mat.policeDisclosure) ||
+            (meta && meta.Material && meta.Material.policeDisclosure) ||
+            (meta && meta.policeDisclosure) ||
+            {}
+  var cps = (mat && mat.cpsDisclosure) ||
+            (meta && meta.Material && meta.Material.cpsDisclosure) ||
+            (meta && meta.cpsDisclosure) ||
+            {}
+
+  // When to show sections
+  // - Statements and Exhibits: compact Police block only
+  // - Unused / Sensitive: full Police + CPS blocks
+  var hasPoliceSection = isUnusedOrSensitive || isExhibit || isStatement
+
+  // For now, CPS appears only for unused / sensitive material.
+  // (We’ll introduce Statement/Exhibit challenge flows later.)
+  var hasCpsSection = isUnusedOrSensitive
+
+
+  // If/when you want CPS to appear for Exhibits, you can switch to:
+  // var hasCpsSection =
+  //   isUnusedOrSensitive ||
+  //   (isExhibit && cps && typeof cps === 'object' && Object.keys(cps).length > 0)
+
+
+  // Helper: render a status value as a GOV.UK tag
+  function statusTagHTML (kind, value) {
+    var text = (value == null ? '' : String(value)).trim()
+    if (!text) return '—'
+
+    var cls = 'govuk-tag'
+    var lower = text.toLowerCase()
+
+    if (kind === 'police') {
+      // Police statuses (plus support for "evidence" for exhibits)
+      if (lower === 'passes disclosure test') {
+        cls += ' govuk-tag--green'
+      } else if (lower === 'does not pass disclosure test') {
+        cls += ' govuk-tag--yellow'
+      } else if (lower === 'evidence') {
+        // You can change this colour if you prefer grey rather than blue
+        cls += ' govuk-tag--blue'
+      }
+    } else if (kind === 'cps') {
+      // CPS statuses
+      if (lower === 'to be assessed') {
+        cls += ' govuk-tag--grey'
+      } else if (lower === 'disclosable') {
+        cls += ' govuk-tag--turquoise'
+      } else if (lower === 'disclosable by inspection') {
+        cls += ' govuk-tag--purple'
+      } else if (lower === 'not disclosable') {
+        cls += ' govuk-tag--orange'
+      } else if (lower === 'clearly not disclosable') {
+        cls += ' govuk-tag--red'
+      } else if (lower === 'evidence') {
+        cls += ' govuk-tag--blue'
+      }
     }
 
-    function sectionHTMLLocal (title, rows) {
-      if (!rows) return ''
+    return '<strong class="' + cls + '">' + esc(text) + '</strong>'
+  }
+
+  function rowsHTMLLocal (obj, mapping) {
+    return mapping.map(function (m) {
+      var v = (m.get ? m.get(obj) : obj && obj[m.key])
+      if (v == null || v === '' || (Array.isArray(v) && v.length === 0)) return ''
+      var valHTML = (m.render ? m.render(v) : esc(v))
       return (
-        '<h3 class="govuk-heading-s govuk-!-margin-top-3 govuk-!-margin-bottom-1">' + esc(title) + '</h3>' +
-        '<dl class="govuk-summary-list govuk-!-margin-bottom-2">' + rows + '</dl>'
+        '<div class="govuk-summary-list__row">' +
+          '<dt class="govuk-summary-list__key">' + esc(m.label) + '</dt>' +
+          '<dd class="govuk-summary-list__value">' + valHTML + '</dd>' +
+        '</div>'
       )
-    }
+    }).join('')
+  }
 
-    function sectionHTMLNoHeadingLocal (rows) {
-      if (!rows) return ''
-      return (
-        '<dl class="govuk-summary-list govuk-!-margin-top-3 govuk-!-margin-bottom-2">' + rows + '</dl>'
-      )
-    }
+  function sectionHTMLLocal (title, rows) {
+    if (!rows) return ''
+    return (
+      '<h3 class="govuk-heading-s govuk-!-margin-top-3 govuk-!-margin-bottom-1">' + esc(title) + '</h3>' +
+      '<dl class="govuk-summary-list govuk-!-margin-bottom-2">' + rows + '</dl>'
+    )
+  }
 
-    var materialRows = rowsHTMLLocal(mat, [
-      { key: 'Title',                  label: 'Title' },
+  function sectionHTMLNoHeadingLocal (rows) {
+    if (!rows) return ''
+    return (
+      '<dl class="govuk-summary-list govuk-!-margin-top-3 govuk-!-margin-bottom-2">' + rows + '</dl>'
+    )
+  }
+
+  // ----------------------------------
+  // Core material rows
+  // ----------------------------------
+
+  var materialRows
+
+  if (isUnusedOrSensitive) {
+    // Unused non-sensitive / Sensitive layout
+    materialRows = rowsHTMLLocal(mat, [
       { key: 'Reference',              label: 'Reference' },
-      { key: 'ProducedbyWitnessId',    label: 'Produced by (witness id)' },
-      { key: 'MaterialClassification', label: 'Material classification' },
-      { key: 'MaterialType',           label: 'Material type' },
-      { key: 'SentExternally',         label: 'Sent externally' },
-      { key: 'RelatedParticipantId',   label: 'Related participant id' },
-      { key: 'Incident',               label: 'Incident' },
+      { key: 'Title',                  label: 'Title' },
+      { key: 'MaterialClassification', label: 'Classification' },
+      { key: 'Description',            label: 'Description' },
+      { key: 'PeriodFrom',             label: 'Period from' },
+      { key: 'ProducedbyWitnessId',    label: 'Produced by' }
+    ])
+  } else {
+    // Default layout (Statements, Exhibits, etc)
+    materialRows = rowsHTMLLocal(mat, [
+      { key: 'Reference',              label: 'Reference' },
+      { key: 'Title',                  label: 'Title' },
+      { key: 'MaterialClassification', label: 'Classification' },
+      { key: 'Description',            label: 'Description' },
       { key: 'Location',               label: 'Location' },
       { key: 'PeriodFrom',             label: 'Period from' },
-      { key: 'PeriodTo',               label: 'Period to' }
+      { key: 'PeriodTo',               label: 'Period to' },
+      { key: 'ProducedbyWitnessId',    label: 'Produced by' },
+      { key: 'MaterialType',           label: 'Type' },
+      { key: 'SentExternally',         label: 'Sent externally' },
+      { key: 'RelatedParticipantId',   label: 'Related participant id' }
     ])
+  }
 
-    var relatedRows = rowsHTMLLocal(rel, [
-      { key: 'RelatesToItem',    label: 'Relates to item' },
-      { key: 'RelatedItemId',    label: 'Related item id' },
-      { key: 'RelationshipType', label: 'Relationship type' }
-    ])
+  // ----------------------------------
+  // Related + digital
+  // ----------------------------------
 
-    var digitalRows
-    if (Array.isArray(dig.Items) && dig.Items.length) {
-      digitalRows = dig.Items.map(function (it, idx) {
-        var itemRows = rowsHTMLLocal(it, [
-          { key: 'FileName',             label: 'File name' },
-          { key: 'ExternalFileLocation', label: 'External file location' },
-          { key: 'ExternalFileURL',      label: 'External file URL', render: function (v) {
-            if (v === '#' || v === '') return '—'
-            return '<a class="govuk-link" href="' + esc(v) + '" target="_blank" rel="noreferrer">' + esc(v) + '</a>'
-          } },
-          { key: 'DigitalSignature',     label: 'Digital signature' }
-        ])
-        return itemRows ? (
-          '<div class="govuk-!-margin-bottom-2">' +
-            '<h4 class="govuk-heading-s govuk-!-margin-bottom-1">Item ' + (idx + 1) + '</h4>' +
-            '<dl class="govuk-summary-list govuk-!-margin-bottom-1">' + itemRows + '</dl>' +
-          '</div>'
-        ) : ''
-      }).join('')
-    } else {
-      digitalRows = rowsHTMLLocal(dig, [
+  var relatedRows = rowsHTMLLocal(rel, [
+    { key: 'RelatesToItem',    label: 'Relates to item' },
+    { key: 'RelatedItemId',    label: 'Related item id' },
+    { key: 'RelationshipType', label: 'Relationship type' }
+  ])
+
+  var digitalRows
+  if (Array.isArray(dig.Items) && dig.Items.length) {
+    digitalRows = dig.Items.map(function (it, idx) {
+      var itemRows = rowsHTMLLocal(it, [
         { key: 'FileName',             label: 'File name' },
-        { key: 'Document',             label: 'Document' },
         { key: 'ExternalFileLocation', label: 'External file location' },
         { key: 'ExternalFileURL',      label: 'External file URL', render: function (v) {
           if (v === '#' || v === '') return '—'
-          return '<a class="govuk-link js-doc-link" href="' + esc(v) + '" target="_blank" rel="noreferrer">' + esc(v) + '</a>'
+          return '<a class="govuk-link" href="' + esc(v) + '" target="_blank" rel="noreferrer">' + esc(v) + '</a>'
         } },
         { key: 'DigitalSignature',     label: 'Digital signature' }
       ])
-    }
-
-    var policeRows = rowsHTMLLocal(pol, [
-      { key: 'DisclosureStatus',               label: 'Disclosure status' },
-      { key: 'RationaleForDisclosureDecision', label: 'Rationale for disclosure decision' },
-      { key: 'Rebuttable',                     label: 'Rebuttable' },
-      { key: 'SensitivityRationale',           label: 'Sensitivity rationale' },
-      { key: 'Description',                    label: 'Description' },
-      { key: 'Exceptions',                     label: 'Exceptions', render: function (arr) {
-        if (!Array.isArray(arr) || !arr.length) return '—'
-        return '<ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-0">' +
-               arr.map(function (x) { return '<li>' + esc(x) + '</li>' }).join('') +
-               '</ul>'
+      return itemRows ? (
+        '<div class="govuk-!-margin-bottom-2">' +
+          '<h4 class="govuk-heading-s govuk-!-margin-bottom-1">Item ' + (idx + 1) + '</h4>' +
+          '<dl class="govuk-summary-list govuk-!-margin-bottom-1">' + itemRows + '</dl>' +
+        '</div>'
+      ) : ''
+    }).join('')
+  } else {
+    digitalRows = rowsHTMLLocal(dig, [
+      { key: 'FileName',             label: 'File name' },
+      { key: 'Document',             label: 'Document' },
+      { key: 'ExternalFileLocation', label: 'External file location' },
+      { key: 'ExternalFileURL',      label: 'External file URL', render: function (v) {
+        if (v === '#' || v === '') return '—'
+        return '<a class="govuk-link js-doc-link" href="' + esc(v) + '" target="_blank" rel="noreferrer">' + esc(v) + '</a>'
       } },
-      { label: 'Inspection date', get: function () { return insp.DateOfInspection } },
-      { label: 'Inspected by',   get: function () { return insp.InspectedBy } }
+      { key: 'DigitalSignature',     label: 'Digital signature' }
     ])
-
-    var cpsRows = rowsHTMLLocal(cps, [
-      { key: 'DisclosureStatus',               label: 'Disclosure status' },
-      { key: 'RationaleForDisclosureDecision', label: 'Rationale for disclosure decision' },
-      { key: 'SensitivityDispute',             label: 'Sensitivity dispute' }
-    ])
-
-    var metaBar =
-      '<div class="dcf-viewer__meta-bar">' +
-        '<div class="dcf-meta-actions">' +
-          '<div class="dcf-meta-right">' +
-            '<a href="#" class="govuk-link js-meta-toggle dcf-meta-toggle" ' +
-              'data-action="toggle-meta" ' +
-              'aria-expanded="false" ' +
-              'aria-controls="' + esc(bodyId) + '" ' +
-              'data-controls="' + esc(bodyId) + '">' +
-              '<span class="dcf-caret" aria-hidden="true">▸</span>' +
-              '<span class="dcf-meta-linktext">Show details</span>' +
-            '</a>' +
-          '</div>' +
-        '</div>' +
-      '</div>'
-
-    var inlineActions = buildInlineActionsMenu(meta)
-
-    return '' +
-      '<div class="dcf-viewer__meta" data-meta-root>' +
-        metaBar +
-        '<div id="' + esc(bodyId) + '" class="dcf-viewer__meta-body" hidden>' +
-          inlineActions +
-          // Keeping your existing behaviour: materialRows appears twice
-          sectionHTMLNoHeadingLocal(materialRows) +
-          sectionHTMLNoHeadingLocal(materialRows) +
-          sectionHTMLLocal('Related materials',      relatedRows)  +
-          sectionHTMLLocal('Digital representation', digitalRows)  +
-          sectionHTMLLocal('Police material',        policeRows)   +
-          sectionHTMLLocal('CPS material',           cpsRows)      +
-        '</div>' +
-      '</div>'
   }
+
+  // ----------------------------------
+  // Police / CPS disclosure
+  // ----------------------------------
+
+  var policeRows = ''
+  var cpsRows = ''
+
+  if (hasPoliceSection) {
+    if (isExhibit || isStatement) {
+      // Compact block for Statements & Exhibits
+      policeRows = rowsHTMLLocal(pol, [
+        {
+          label: 'Police disclosure status',
+          // Ensure we always get a value, even if pol.status is missing,
+          // and override to "Evidence" when isEvidence is true.
+          get: function (obj) {
+            var raw = obj && obj.status
+            if ((raw == null || raw === '') && isEvidence) return 'Evidence'
+            return raw
+          },
+          render: function (v) {
+            return statusTagHTML('police', v)
+          }
+        },
+        { key: 'InspectedBy', label: 'Inspected by' },
+        { key: 'inspectedOn', label: 'Inspected on' }
+      ])
+    } else {
+      // Unused / Sensitive: full police block
+      policeRows = rowsHTMLLocal(pol, [
+        {
+          key: 'status',
+          label: 'Police disclosure status',
+          render: function (v) { return statusTagHTML('police', v) }
+        },
+        { key: 'rationale',       label: 'Rationale for decision' },
+        { key: 'rebuttable',      label: 'Rebuttable' },
+        { key: 'sensitivity',     label: 'Sensitivity rationale' },
+        { key: 'exception',       label: 'Exception' },
+        { key: 'exceptionReason', label: 'Exception reason' },
+        { key: 'InspectedBy',     label: 'Inspected by' },
+        { key: 'inspectedOn',     label: 'Inspected on' }
+      ])
+    }
+  }
+
+
+  if (hasCpsSection) {
+    cpsRows = rowsHTMLLocal(cps, [
+      {
+        key: 'status',
+        label: 'Disclosure status',
+        render: function (v) { return statusTagHTML('cps', v) }
+      },
+      { key: 'rationale',          label: 'Rationale for decision' },
+      { key: 'SensitivityDispute', label: 'Reason for dispute' }
+    ])
+  }
+
+  // ----------------------------------
+  // Wrap meta panel
+  // ----------------------------------
+
+  var metaBar =
+    '<div class="dcf-viewer__meta-bar">' +
+      '<div class="dcf-meta-actions">' +
+        '<div class="dcf-meta-right">' +
+          '<a href="#" class="govuk-link js-meta-toggle dcf-meta-toggle" ' +
+            'data-action="toggle-meta" ' +
+            'aria-expanded="false" ' +
+            'aria-controls="' + esc(bodyId) + '" ' +
+            'data-controls="' + esc(bodyId) + '">' +
+            '<span class="dcf-caret" aria-hidden="true">▸</span>' +
+            '<span class="dcf-meta-linktext">Show details</span>' +
+          '</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+
+  var inlineActions = buildInlineActionsMenu(meta)
+
+  return '' +
+    '<div class="dcf-viewer__meta" data-meta-root>' +
+      metaBar +
+      '<div id="' + esc(bodyId) + '" class="dcf-viewer__meta-body" hidden>' +
+        inlineActions +
+        sectionHTMLNoHeadingLocal(materialRows) +
+        sectionHTMLLocal('Related materials',      relatedRows)  +
+        sectionHTMLLocal('Digital representation', digitalRows)  +
+        (policeRows ? sectionHTMLLocal('Police disclosure status', policeRows) : '') +
+        (cpsRows    ? sectionHTMLLocal('CPS disclosure status',    cpsRows)    : '') +
+      '</div>' +
+    '</div>'
+}
+
+
 
   // --------------------------------------
   // Preview builder (pdf.js + chrome)
@@ -873,22 +1014,58 @@
 
     removeSearchStatus()
 
+    // Pull meta for the material
     var meta = getMaterialJSONFromLink(link) || {}
-    var url = link.getAttribute('data-file-url') || link.getAttribute('href')
+    var url  = link.getAttribute('data-file-url') || link.getAttribute('href')
 
     if (!url && meta && meta.Material && meta.Material.myFileUrl) {
       url = meta.Material.myFileUrl
     }
 
-    var title = link.getAttribute('data-title') || (link.textContent || '').trim() || 'Selected file'
+    var title =
+      link.getAttribute('data-title') ||
+      (link.textContent || '').trim() ||
+      'Selected file'
 
-    var card = link.closest('.dcf-material-card')
-    if (card) {
-      viewer._currentCard = card
-      markCardVisited(card)
-      setActiveCard(card)
+    // NEW: work out canonical ItemId from meta
+    var itemId =
+      (meta && (meta.ItemId ||
+                (meta.Material && meta.Material.ItemId) ||
+                meta.itemId)) || null
+
+    var realCard = null
+
+    // If we have an ItemId, try to find the real card in the left-hand list
+    if (itemId) {
+      try {
+        realCard = document.querySelector(
+          '.dcf-material-card[data-item-id="' + CSS.escape(itemId) + '"]'
+        )
+      } catch (e) {
+        // CSS.escape might not exist in some older browsers; fall back
+        realCard = document.querySelector(
+          '.dcf-material-card[data-item-id="' + itemId.replace(/"/g, '\\"') + '"]'
+        )
+      }
     }
 
+    // Fallback: use the card from the DOM that actually contains this link
+    var closestCard = link.closest('.dcf-material-card')
+    if (closestCard && !realCard && document.documentElement.contains(closestCard)) {
+      realCard = closestCard
+    }
+
+    // Update viewer._currentCard + active state using the *real* card only
+    if (realCard) {
+      viewer._currentCard = realCard
+      markCardVisited(realCard)
+      setActiveCard(realCard)
+    } else {
+      viewer._currentCard = null
+      setActiveCard(null)
+    }
+
+    // Normal viewer setup continues as before
     viewer.dataset.mode = 'document'
     viewer.dataset.fromSearch = fromSearch ? 'true' : 'false'
 
@@ -899,19 +1076,31 @@
       try { new MOJFrontend.ButtonMenu({ container: menu }).init() } catch (e) {}
     }
 
+    // This creates/updates the tab and applies .is-active
     addOrActivateTab(meta, url, title)
 
+    // Back-to-search visibility
     var backLink = viewer.querySelector('[data-action="back-to-search"]')
-    var backSep = viewer.querySelector('[data-role="back-to-search-sep"]')
-    var canShowBackToSearch = (viewer.dataset.fromSearch === 'true') && !!viewer._lastSearchHTML
+    var backSep  = viewer.querySelector('[data-role="back-to-search-sep"]')
+    var canShowBackToSearch =
+      (viewer.dataset.fromSearch === 'true') && !!viewer._lastSearchHTML
     if (backLink) backLink.hidden = !canShowBackToSearch
-    if (backSep) backSep.hidden = !canShowBackToSearch
+    if (backSep)  backSep.hidden  = !canShowBackToSearch
 
-    console.log('Opening', { url: url, title: title, itemId: meta && meta.ItemId })
+    console.log('Opening', {
+      url: url,
+      title: title,
+      itemId: itemId
+    })
 
     viewer.hidden = false
     try { viewer.focus({ preventScroll: true }) } catch (e) {}
   }
+
+
+  // --------------------------------------
+  // Helper for search navigation (Prev / Next)
+  // --------------------------------------
 
   // --------------------------------------
   // Helper for search navigation (Prev / Next)
@@ -920,6 +1109,8 @@
   window.__dcfOpenMaterialFromSearch = function (hit) {
     if (!hit || !hit.href) return
 
+    // Build a temporary, off-DOM card just so openMaterialPreview
+    // can read its JSON meta in the usual way.
     var card = document.createElement('article')
     card.className = 'dcf-material-card'
     if (hit.itemId) card.setAttribute('data-item-id', hit.itemId)
@@ -942,8 +1133,19 @@
     card.appendChild(link)
     card.appendChild(script)
 
+    // Let the normal preview flow run (this will create/update the tab)
     openMaterialPreview(link, { fromSearch: true })
+
+    // EXTRA: explicitly activate the correct tab for this hit.
+    // Use the same stableId logic as addOrActivateTab so we target
+    // *exactly* the tab that was just created/updated.
+    var id = stableId(hit.meta || {}, hit.href)
+    if (id) {
+      switchToTabById(id)
+    }
   }
+
+
 
   // --------------------------------------
   // Intercepts: open previews from cards/links
