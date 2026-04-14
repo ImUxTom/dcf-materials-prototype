@@ -6,8 +6,6 @@
 
 {% set captionName = "Edit charge: " + charge.chargeCode + " - " + defendant.firstName + " " + defendant.lastName %}
 
-{% set particulars = charge.particulars | replace("[defendant]", defendant.firstName + " " + defendant.lastName) %}
-
 {% block content %}
   {% include "_shared/_includes/case/dcf-navigation.njk" %}
   {% include "_shared/_includes/success-banner-safe.njk" %}
@@ -18,8 +16,8 @@
     <div class="govuk-grid-column-two-thirds">
 
       {# ── Resolve what has changed ─────────────────────────────── #}
-      {% set dateChanged   = data["correctDate"] == "Yes" %}
-      {% set victimChanged = data["hasVictim"]   == "Yes" %}
+      {% set dateChanged   = data["correctDate"] == "No" %}
+      {% set victimChanged = data["hasVictim"]   == "No" %}
 
       {% if dateChanged or victimChanged %}
         {% if dateChanged and victimChanged %}
@@ -34,7 +32,7 @@
           type: "important",
           html: "<p class=\"govuk-body\">You have edited " + changedText + ". Ensure the particulars reflect the changes.</p>"
         }) }}
-        {% endif %}
+      {% endif %}
 
 
       <form method="post">
@@ -52,31 +50,27 @@
           items: [
             {
               value: "Yes",
-               text: "Yes, edit the particulars",
+              text: "Yes",
               checked: data["chargeParticularsCorrect"] == "Yes"
             },
             {
               value: "No",
-              text: "No, keep the particulars as they are",
+              text: "No",
               checked: data["chargeParticularsCorrect"] == "No"
             }
           ]
         }) }}
 
 
+          {{ govukInsetText({
+            text: charge.particulars
+          }) }}
+
         <div class="govuk-button-group govuk-!-margin-top-6">
           {{ govukButton({ text: "Continue" }) }}
-          <a href="#" class="govuk-link">Cancel</a>
         </div>
 
       </form>
-
-      {{ govukDetails({
-          summaryText: "View charge particulars",
-          classes: "govuk-!-margin-top-5",
-          text: particulars
-        }) }}
-
 
     </div>
   </div>

@@ -30,12 +30,15 @@
           items: [
             {
               value: "Yes",
-              text: "Yes, change the victim",
+              text: "Yes",
               checked: data["hasVictim"] == "Yes"
             },
             {
               value: "No",
-              text: "No, keep " + currentVictimName + " as the victim",
+              text: "No",
+              hint: {
+                text: "Keep " + currentVictimName + " as the victim for this offence"
+              },
               checked: data["hasVictim"] == "No"
             }
           ]
@@ -43,7 +46,6 @@
 
         <div class="govuk-button-group govuk-!-margin-top-6">
           {{ govukButton({ text: "Continue" }) }}
-          <a href="#" class="govuk-link">Cancel</a>
         </div>
 
       </form>

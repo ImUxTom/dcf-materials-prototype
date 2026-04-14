@@ -31,12 +31,15 @@
           items: [
             {
               value: "Yes",
-              text: "Yes, change it",
+              text: "Yes",
               checked: data["correctDate"] == "Yes"
             },
             {
               value: "No",
-              text: "No, keep " + charge.offenceDate | date("d MMMM yyyy"),
+              text: "No",
+              hint: {
+                text: "Keep " + charge.offenceDate | date("d MMMM yyyy")
+              },
               checked: data["correctDate"] == "No"
             }
           ]
