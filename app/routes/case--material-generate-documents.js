@@ -248,6 +248,49 @@ module.exports = router => {
 
 
   // -------------------------
+  // REMOVE DEFENDANT
+  // -------------------------
+  router.get('/cases/:caseId/material/generate-cps-documents/remove-defendant', async (req, res) => {
+    const caseId = parseInt(req.params.caseId, 10)
+    if (Number.isNaN(caseId)) return res.status(400).send('Invalid case id')
+
+    const _case = await fetchCase(caseId)
+    if (!_case) return res.status(404).render('not-found')
+
+    const defendantId = req.query.defendantId
+    const docs = getGenerateDocsData(req)
+    const defendant = (docs.defendants || []).find(d => String(d.id) === String(defendantId))
+    const byDefendant = _.get(req, 'session.data.generateCpsDocuments.defendantDocumentsById', {})
+    const selectedDocIds = byDefendant[String(defendantId)] || []
+    const selectedDocs = selectedDocIds.map(id => {
+      const doc = (defendant && defendant.documents || []).find(d => String(d.id) === String(id))
+      return doc ? doc.label : id
+    })
+
+    return res.render('v2/cases/material/generate-cps-documents/remove-defendant', {
+      _case,
+      defendant,
+      selectedDocs,
+      defendantId,
+      returnUrl: req.query.returnUrl
+    })
+  })
+
+  router.post('/cases/:caseId/material/generate-cps-documents/remove-defendant', (req, res) => {
+    const caseId = parseInt(req.params.caseId, 10)
+    if (Number.isNaN(caseId)) return res.status(400).send('Invalid case id')
+
+    ensureWizardState(req)
+    const defendantId = req.body.defendantId
+    const returnUrl = req.body.returnUrl
+    const byDefendant = _.get(req, 'session.data.generateCpsDocuments.defendantDocumentsById', {})
+    delete byDefendant[String(defendantId)]
+    _.set(req, 'session.data.generateCpsDocuments.defendantDocumentsById', byDefendant)
+
+    return res.redirect(returnUrl || `/cases/${caseId}/material/generate-cps-documents/check`)
+  })
+
+  // -------------------------
   // STEP 3A: Select a witness (radios)
   // -------------------------
   router.get('/cases/:caseId/material/generate-cps-documents/witnesses', async (req, res) => {
@@ -390,6 +433,49 @@ module.exports = router => {
 
     // More than one remaining → back to radios
     return res.redirect(`/cases/${caseId}/material/generate-cps-documents/witnesses`)
+  })
+
+  // -------------------------
+  // REMOVE WITNESS
+  // -------------------------
+  router.get('/cases/:caseId/material/generate-cps-documents/remove-witness', async (req, res) => {
+    const caseId = parseInt(req.params.caseId, 10)
+    if (Number.isNaN(caseId)) return res.status(400).send('Invalid case id')
+
+    const _case = await fetchCase(caseId)
+    if (!_case) return res.status(404).render('not-found')
+
+    const witnessId = req.query.witnessId
+    const docs = getGenerateDocsData(req)
+    const witness = (docs.witnesses || []).find(w => String(w.id) === String(witnessId))
+    const byWitness = _.get(req, 'session.data.generateCpsDocuments.witnessDocumentsById', {})
+    const selectedDocIds = byWitness[String(witnessId)] || []
+    const selectedDocs = selectedDocIds.map(id => {
+      const doc = (witness && witness.documents || []).find(d => String(d.id) === String(id))
+      return doc ? doc.label : id
+    })
+
+    return res.render('v2/cases/material/generate-cps-documents/remove-witness', {
+      _case,
+      witness,
+      selectedDocs,
+      witnessId,
+      returnUrl: req.query.returnUrl
+    })
+  })
+
+  router.post('/cases/:caseId/material/generate-cps-documents/remove-witness', (req, res) => {
+    const caseId = parseInt(req.params.caseId, 10)
+    if (Number.isNaN(caseId)) return res.status(400).send('Invalid case id')
+
+    ensureWizardState(req)
+    const witnessId = req.body.witnessId
+    const returnUrl = req.body.returnUrl
+    const byWitness = _.get(req, 'session.data.generateCpsDocuments.witnessDocumentsById', {})
+    delete byWitness[String(witnessId)]
+    _.set(req, 'session.data.generateCpsDocuments.witnessDocumentsById', byWitness)
+
+    return res.redirect(returnUrl || `/cases/${caseId}/material/generate-cps-documents/check`)
   })
 
   // -------------------------

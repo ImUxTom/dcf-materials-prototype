@@ -12,7 +12,7 @@
 {% block beforeContent %}
   {{ govukBackLink({
     text: "Back",
-    href: "/cases/" ~ _case.id ~ "/material/generate-cps-documents/witness-documents"
+    href: "/cases/" ~ _case.id ~ "/material/generate-cps-documents"
   }) }}
 {% endblock %}
 
@@ -59,9 +59,13 @@
       {% endset %}
 
       {{ govukSummaryList({
+        card: {
+          title: { text: "Case documents" }
+        },
         rows: [
           {
-            key: { text: "Case documents" },
+            classes: "govuk-summary-list__row--no-border",
+            key: { text: "Documents" },
             value: { html: caseValueHtml },
             actions: {
               items: [
@@ -85,7 +89,6 @@
       {% if defendantById and (defendantById | length) %}
         {% for defId, docIds in defendantById %}
 
-          {# Find defendant name #}
           {% set defName = "Defendant " ~ defId %}
           {% for d in defendants %}
             {% if (d.id | string) == (defId | string) %}
@@ -100,7 +103,6 @@
               <ul class="govuk-list">
                 {% for did in docIds %}
                   {% set dlabel = did %}
-                  {# Find the doc label within the matched defendant's documents #}
                   {% for d in defendants %}
                     {% if (d.id | string) == (defId | string) %}
                       {% for dd in (d.documents or []) %}
@@ -117,21 +119,21 @@
           {% endset %}
 
           {{ govukSummaryList({
+            card: {
+              title: { text: defName },
+              actions: {
+                items: [
+                  {
+                    href: "/cases/" ~ _case.id ~ "/material/generate-cps-documents/remove-defendant?defendantId=" ~ defId ~ "&returnUrl=" ~ (returnUrl | urlencode),
+                    text: "Remove",
+                    visuallyHiddenText: defName
+                  }
+                ]
+              }
+            },
             rows: [
               {
-                key: { text: "Name" },
-                value: { text: defName },
-                actions: {
-                  items: [
-                    {
-                      href: "#",
-                      text: "Remove",
-                      visuallyHiddenText: defName
-                    }
-                  ]
-                }
-              },
-              {
+                classes: "govuk-summary-list__row--no-border",
                 key: { text: "Documents" },
                 value: { html: defDocsHtml },
                 actions: {
@@ -161,7 +163,6 @@
       {% if witnessById and (witnessById | length) %}
         {% for witId, docIds in witnessById %}
 
-          {# Find witness name #}
           {% set witName = "Witness " ~ witId %}
           {% for w in witnesses %}
             {% if (w.id | string) == (witId | string) %}
@@ -176,7 +177,6 @@
               <ul class="govuk-list">
                 {% for wid in docIds %}
                   {% set wlabel = wid %}
-                  {# Find the doc label within the matched witness's documents #}
                   {% for w in witnesses %}
                     {% if (w.id | string) == (witId | string) %}
                       {% for wd in (w.documents or []) %}
@@ -193,21 +193,21 @@
           {% endset %}
 
           {{ govukSummaryList({
+            card: {
+              title: { text: witName },
+              actions: {
+                items: [
+                  {
+                    href: "/cases/" ~ _case.id ~ "/material/generate-cps-documents/remove-witness?witnessId=" ~ witId ~ "&returnUrl=" ~ (returnUrl | urlencode),
+                    text: "Remove",
+                    visuallyHiddenText: witName
+                  }
+                ]
+              }
+            },
             rows: [
               {
-                key: { text: "Name" },
-                value: { text: witName },
-                actions: {
-                  items: [
-                    {
-                      href: "#",
-                      text: "Remove",
-                      visuallyHiddenText: witName
-                    }
-                  ]
-                }
-              },
-              {
+                classes: "govuk-summary-list__row--no-border",
                 key: { text: "Documents" },
                 value: { html: witDocsHtml },
                 actions: {
