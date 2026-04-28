@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="govuk-grid-row">
+  <div class="govuk-grid-row dcf-generate-check">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
       <span class="govuk-caption-m">
@@ -35,6 +35,13 @@
       {% set selectedCaseIds = s.caseDocuments or [] %}
       {% set defendantById = s.defendantDocumentsById or {} %}
       {% set witnessById = s.witnessDocumentsById or {} %}
+
+      {% set _total = selectedCaseIds | length %}
+      {% for defId, docIds in defendantById %}{% set _total = _total + (docIds | length) %}{% endfor %}
+      {% for witId, docIds in witnessById %}{% set _total = _total + (docIds | length) %}{% endfor %}
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-6">
+        {{ _total }} {{ "document" if _total == 1 else "documents" }}
+      </h3>
 
       {# -----------------------------
          CASE DOCUMENTS

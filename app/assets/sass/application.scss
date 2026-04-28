@@ -276,6 +276,14 @@ $statuses: (
   margin-bottom: 15px !important;
 }
 
+.dcf-generate-check .govuk-summary-card__content .govuk-summary-list__row:last-of-type {
+  border-bottom: none !important;
+}
+
+.dcf-generate-check .govuk-summary-card__content .govuk-summary-list:last-of-type {
+  margin-bottom: 0 !important;
+}
+
 .govuk-template--rebranded .govuk-header {
   background: govuk-colour("black") !important;
 }

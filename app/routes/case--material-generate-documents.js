@@ -530,9 +530,13 @@ module.exports = router => {
       witnesses: updatedWitnesses
     })
 
+    const totalDocCount =
+      selectedCaseIds.length +
+      Object.values(defendantById).reduce((sum, docs) => sum + docs.length, 0) +
+      Object.values(witnessById).reduce((sum, docs) => sum + docs.length, 0)
+
     _.set(req, 'session.data.successBanner', {
-      titleText: 'Documents queued',
-      text: 'Your selected documents will be generated.'
+      text: `${totalDocCount} ${totalDocCount === 1 ? 'document' : 'documents'} generated`
     })
 
     return res.redirect(`/cases/${caseId}/material?tab=view-materials`)
