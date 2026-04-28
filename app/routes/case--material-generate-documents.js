@@ -499,7 +499,37 @@ module.exports = router => {
     const caseId = parseInt(req.params.caseId, 10)
     if (Number.isNaN(caseId)) return res.status(400).send('Invalid case id')
 
-    // Baseline behaviour: show success + return to materials
+    const selections = _.get(req, 'session.data.generateCpsDocuments', {})
+    const selectedCaseIds = selections.caseDocuments || []
+    const defendantById = selections.defendantDocumentsById || {}
+    const witnessById = selections.witnessDocumentsById || {}
+
+    const docs = getGenerateDocsFixture()
+    const now = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
+    const updatedCaseDocs = (docs.caseDocuments || []).map(doc =>
+      selectedCaseIds.includes(String(doc.id)) ? { ...doc, lastGenerated: now } : { ...doc, lastGenerated: null }
+    )
+    const updatedDefendants = (docs.defendants || []).map(defendant => {
+      const sel = defendantById[String(defendant.id)] || []
+      return { ...defendant, documents: (defendant.documents || []).map(doc =>
+        sel.includes(String(doc.id)) ? { ...doc, lastGenerated: now } : { ...doc, lastGenerated: null }
+      )}
+    })
+    const updatedWitnesses = (docs.witnesses || []).map(witness => {
+      const sel = witnessById[String(witness.id)] || []
+      return { ...witness, documents: (witness.documents || []).map(doc =>
+        sel.includes(String(doc.id)) ? { ...doc, lastGenerated: now } : { ...doc, lastGenerated: null }
+      )}
+    })
+
+    _.set(req, 'session.data.caseMaterialsGenerateDocuments', {
+      ...docs,
+      caseDocuments: updatedCaseDocs,
+      defendants: updatedDefendants,
+      witnesses: updatedWitnesses
+    })
+
     _.set(req, 'session.data.successBanner', {
       titleText: 'Documents queued',
       text: 'Your selected documents will be generated.'

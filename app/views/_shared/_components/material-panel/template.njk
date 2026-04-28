@@ -34,7 +34,7 @@
 {# ✅ MUST be after the loop, otherwise it stays 0 #}
 {% set unusedCount = unsNonSensitiveCount + sensitiveCount %}
 
-{# ---------- CPS generated documents count ---------- #}
+{# ---------- CPS generated documents count (one per selected doc) ---------- #}
 {% set cpsDocsCount = 0 %}
 {% for doc in (gd.caseDocuments or []) %}
   {% if doc.lastGenerated %}{% set cpsDocsCount = cpsDocsCount + 1 %}{% endif %}
@@ -240,7 +240,7 @@
     <p class="govuk-hint">No CPS documents generated yet.</p>
   {% else %}
 
-    {# --- Case documents --- #}
+    {# --- Case documents — one card per selected doc --- #}
     {% set hasCaseDocs = false %}
     {% for doc in (gd.caseDocuments or []) %}
       {% if doc.lastGenerated %}{% set hasCaseDocs = true %}{% endif %}
@@ -251,21 +251,13 @@
       <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
         {% for doc in gd.caseDocuments %}
           {% if doc.lastGenerated %}
-            {% set normDoc = {
-              ItemId: doc.id,
-              Title: doc.label,
-              Type: "CPS Document",
-              materialStatus: "Generated",
-              date: doc.lastGenerated,
-              myFileUrl: null
-            } %}
-            <li class="govuk-!-margin-bottom-2">{{ renderCard(normDoc, cm) }}</li>
+            <li class="govuk-!-margin-bottom-2">{{ renderCard({ ItemId: doc.id, Title: doc.label, Type: "CPS Document", materialStatus: "New", date: doc.lastGenerated }, cm) }}</li>
           {% endif %}
         {% endfor %}
       </ul>
     {% endif %}
 
-    {# --- Defendant documents --- #}
+    {# --- Defendant documents — one card per selected doc, grouped by defendant --- #}
     {% for defendant in (gd.defendants or []) %}
       {% set hasDefDocs = false %}
       {% for doc in (defendant.documents or []) %}
@@ -278,22 +270,14 @@
         <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
           {% for doc in defendant.documents %}
             {% if doc.lastGenerated %}
-              {% set normDoc = {
-                ItemId: defendant.id ~ "_" ~ doc.id,
-                Title: doc.label,
-                Type: "CPS Document",
-                materialStatus: "Generated",
-                date: doc.lastGenerated,
-                myFileUrl: null
-              } %}
-              <li class="govuk-!-margin-bottom-2">{{ renderCard(normDoc, cm) }}</li>
+              <li class="govuk-!-margin-bottom-2">{{ renderCard({ ItemId: defendant.id ~ "_" ~ doc.id, Title: doc.label, Type: "CPS Document", materialStatus: "New", date: doc.lastGenerated }, cm) }}</li>
             {% endif %}
           {% endfor %}
         </ul>
       {% endif %}
     {% endfor %}
 
-    {# --- Witness documents --- #}
+    {# --- Witness documents — one card per selected doc, grouped by witness --- #}
     {% for witness in (gd.witnesses or []) %}
       {% set hasWitDocs = false %}
       {% for doc in (witness.documents or []) %}
@@ -306,15 +290,7 @@
         <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
           {% for doc in witness.documents %}
             {% if doc.lastGenerated %}
-              {% set normDoc = {
-                ItemId: witness.id ~ "_" ~ doc.id,
-                Title: doc.label,
-                Type: "CPS Document",
-                materialStatus: "Generated",
-                date: doc.lastGenerated,
-                myFileUrl: null
-              } %}
-              <li class="govuk-!-margin-bottom-2">{{ renderCard(normDoc, cm) }}</li>
+              <li class="govuk-!-margin-bottom-2">{{ renderCard({ ItemId: witness.id ~ "_" ~ doc.id, Title: doc.label, Type: "CPS Document", materialStatus: "New", date: doc.lastGenerated }, cm) }}</li>
             {% endif %}
           {% endfor %}
         </ul>
