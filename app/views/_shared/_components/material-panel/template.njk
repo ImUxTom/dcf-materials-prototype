@@ -247,7 +247,7 @@
     {% endfor %}
 
     {% if hasCaseDocs %}
-      <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Case documents</h3>
+      <h3 class="dcf-cps-section-label govuk-!-margin-bottom-2">Case documents</h3>
       <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
         {% for doc in gd.caseDocuments %}
           {% if doc.lastGenerated %}
@@ -266,7 +266,7 @@
 
       {% if hasDefDocs %}
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <h3 class="govuk-heading-s govuk-!-margin-bottom-1">{{ defendant.name }}</h3>
+        <h3 class="dcf-cps-section-label govuk-!-margin-bottom-1">{{ defendant.name }}</h3>
         <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
           {% for doc in defendant.documents %}
             {% if doc.lastGenerated %}
@@ -286,7 +286,7 @@
 
       {% if hasWitDocs %}
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <h3 class="govuk-heading-s govuk-!-margin-bottom-1">{{ witness.name }}</h3>
+        <h3 class="dcf-cps-section-label govuk-!-margin-bottom-1">{{ witness.name }}</h3>
         <ul class="dcf-material-list govuk-!-margin-top-1 govuk-!-margin-bottom-1">
           {% for doc in witness.documents %}
             {% if doc.lastGenerated %}
