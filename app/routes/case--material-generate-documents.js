@@ -103,7 +103,8 @@ module.exports = router => {
     _.set(req, 'session.data.generateCpsDocuments.selectedDefendantId', req.body.selectedDefendantId || null)
 
     const returnUrl = req.query.returnUrl
-    return res.redirect(returnUrl || `/cases/${caseId}/material/generate-cps-documents/defendant-documents`)
+    const next = `/cases/${caseId}/material/generate-cps-documents/defendant-documents`
+    return res.redirect(returnUrl ? `${next}?returnUrl=${encodeURIComponent(returnUrl)}` : next)
   })
 
 
@@ -331,7 +332,8 @@ module.exports = router => {
     _.set(req, 'session.data.generateCpsDocuments.selectedWitnessId', req.body.selectedWitnessId || null)
 
     const returnUrl = req.query.returnUrl
-    return res.redirect(returnUrl || `/cases/${caseId}/material/generate-cps-documents/witness-documents`)
+    const next = `/cases/${caseId}/material/generate-cps-documents/witness-documents`
+    return res.redirect(returnUrl ? `${next}?returnUrl=${encodeURIComponent(returnUrl)}` : next)
   })
 
 
