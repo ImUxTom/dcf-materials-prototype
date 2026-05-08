@@ -1,26 +1,17 @@
-{# _shared/_includes/case/details/tasks-panel.njk #}
+{# _includes/case/details/tasks-panel.njk #}
 
 {# Allow the route to pass in tasks; fall back to placeholder data #}
 {% set tasks = tasks or [
-{
-    name: "Retrieve core details",
-    dueDate: "24 April 2026",
-    status: "Done",
-    owner: "Joe Bloggs",
-    hasWarning: false
-  },
   {
-    name: "Prepare victim letter",
-    dueDate: "15 March 2026",
-    status: "Done",
-    owner: "Anni Arryuokay",
-    hasWarning: false
+    name: "Retrieve core details",
+    dueDate: "24 Jan 2024",
+    role: "Role",
+    hasWarning: true
   },
   {
     name: "Request upgrade file",
-    dueDate: "06 Feb 2026",
-    status: "Done",
-    owner: "Frank Bobbins",
+    dueDate: "06 Feb 2024",
+    role: "Role",
     hasWarning: false
   }
 ] %}
@@ -51,13 +42,7 @@
               Due date
             </th>
             <th scope="col" class="govuk-table__header">
-              Status
-            </th>
-             <th scope="col" class="govuk-table__header">
-              Owner
-            </th>
-            <th scope="col" class="govuk-table__header">
-              Action
+              Role
             </th>
             <th scope="col" class="govuk-table__header govuk-table__header--numeric govuk-visually-hidden">
               Go to task
@@ -78,16 +63,12 @@
                 {% endif %}
               </td>
               <td class="govuk-table__cell case-task-role">
-                <strong class="govuk-tag">
-                  {{ task.status }}
-                </strong>
-              </td>  
-              <td class="govuk-table__cell case-task-name">
-                {{ task.owner }}
+                {{ task.role }}
               </td>
-              <td class="govuk-table__cell case-task-role">
-                <a class="govuk-link" href="#">
-                  Start task
+              <td class="govuk-table__cell govuk-table__cell--numeric case-task-arrow">
+                <a href="#" class="case-task-arrow-link">
+                  <span aria-hidden="true">›</span>
+                  <span class="govuk-visually-hidden">View {{ task.name }}</span>
                 </a>
               </td>
             </tr>
