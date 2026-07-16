@@ -3,7 +3,8 @@
 ## Local setup
 
 1. Clone the repo and switch to the branch you want to work on.
-2. Open the project in your terminal and run these commands one at a time, in this order:
+2. It was set up as a fork therefore permission will be needed from the owner which is not CPS
+3. Open the project in your terminal and run these commands one at a time, in this order:
 
 ```bash
 npm install
@@ -17,4 +18,5 @@ npm run dev
 - http://localhost:3000/manage-prototype
 
 If you run into issues, make sure Node.js and npm are installed first, and if the prototype kit says it cannot find the command, run `npm install` again.
+
 
