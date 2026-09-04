@@ -1,0 +1,27 @@
+{# _shared/_includes/case/details/history-panel.njk
+
+   Moved out of the Outline tab's "Confidential Information to Prosecutor"
+   section per stakeholder feedback — showing the unredacted original text
+   there was misleading and the wrong placement. Lives in its own "History"
+   tab instead (see main-tabs.njk). Logic unchanged: only ever appears once
+   factualSummaryOriginal has been frozen by a first edit or redaction (see
+   captureOriginalIfUnset in case--outline.js) — before that, there's
+   nothing to show. #}
+{% if _case.factualSummaryOriginal %}
+  {% set originalCircumstancesHtml %}
+    {% for paragraph in _case.factualSummaryOriginal.split('\n\n') %}
+<p class="govuk-body">{{ paragraph }}</p>
+    {% endfor %}
+  {% endset %}
+
+  {{ govukSummaryList({
+    card: {
+      title: {
+        html: 'Summary of circumstances of offence(s) (unredacted)'
+      }
+    },
+    rows: [
+      { key: { text: "Added on 24 May 2026" }, value: { html: originalCircumstancesHtml } }
+    ]
+  }) }}
+{% endif %}

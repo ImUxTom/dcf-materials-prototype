@@ -82,6 +82,19 @@
 {% endset -%}
 
 
+{# ---------- History ---------- #}
+{# Replaces Contacts (commented out below) per stakeholder feedback on the
+   Factual summary redact/edit flow — the unredacted original text was
+   previously shown on the Outline tab's Confidential Information to
+   Prosecutor section, which was misleading and the wrong placement. #}
+{% set historyHtml %}
+  <h3 class="govuk-heading-m">History</h3>
+  {% include "_shared/_includes/case/details/history-panel.njk" %}
+{% endset -%}
+
+
+{# Contacts tab removed for now (contactsHtml above is left intact, ready
+   to reinstate) — replaced in this slot by History, see above. #}
 {{ govukTabs({
   id: "case-tabs",
   items: [
@@ -89,6 +102,6 @@
     { label: "Outline",    id: "case-outline",  panel: { html: caseOutlineHtml } },
     { label: "Defendants", id: "defendants",    panel: { html: defendantsHtml } },
     { label: "Witnesses",  id: "witnesses",     panel: { html: witnessesHtml } },
-    { label: "Contacts",   id: "contacts",      panel: { html: contactsHtml } }
+    { label: "History",    id: "history",       panel: { html: historyHtml } }
   ]
 }) }}

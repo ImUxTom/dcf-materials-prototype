@@ -168,30 +168,10 @@ PS Police has also provided a statement detailing their response to the incident
 
 {% set informationToProsecutorHtml %}
 
-{# Original, untouched wording — frozen the first time factualSummary
-   ever changed (an edit-confirm or a redaction commit, whichever
-   happened first — see captureOriginalIfUnset in case--outline.js).
-   factualSummary itself keeps evolving as the current/latest wording, so
-   this is the only place the true original survives once it's been
-   edited and/or redacted. #}
-{% if _case.factualSummaryOriginal %}
-  {% set originalCircumstancesHtml %}
-    {% for paragraph in _case.factualSummaryOriginal.split('\n\n') %}
-<p class="govuk-body">{{ paragraph }}</p>
-    {% endfor %}
-  {% endset %}
-
-  {{ govukSummaryList({
-    card: {
-      title: {
-        html: 'Summary of circumstances of offence(s) (unredacted)'
-      }
-    },
-    rows: [
-      { key: { text: "Added on 24 May 2026" }, value: { html: originalCircumstancesHtml } }
-    ]
-  }) }}
-{% endif %}
+{# The unredacted original text used to live here — moved to its own
+   History tab (see history-panel.njk / main-tabs.njk) per stakeholder
+   feedback that showing it in CIP was misleading and the wrong
+   placement. #}
 
 {% set enquiryValueHtml %}
 <ol class="govuk-list govuk-list--number govuk-!-margin-bottom-6">
