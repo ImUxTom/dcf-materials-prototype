@@ -1,0 +1,49 @@
+{# _shared/_includes/case/material/material-redact-popover.njk
+
+   Redact popover for the materials viewer's "Redact this document" button
+   (see material-redact.js/material-redact-popover.js) — same interaction
+   shape as the factual summary's redact popover (dcf-redact-popover), just
+   working against a selection made inside the PDF.js iframe rather than
+   same-document HTML text. Deliberately outside #material-viewer (see
+   material-panel.njk) so material-viewer.js's innerHTML rebuilds never
+   wipe it.
+
+   Single document/tab at a time — no cross-document "redact all matching"
+   here (that's illustrated in the factual summary version instead), so
+   there's no match-count/view-previous/next stepping wired up behind
+   "Find matching text": it's present for visual parity with the factual
+   summary popover, not functional. #}
+<div class="dcf-redact-popover" id="dcf-material-redact-popover" hidden>
+  <div class="govuk-form-group govuk-!-margin-bottom-3">
+    <label class="govuk-visually-hidden" for="material-popover-tag-select">Redaction type</label>
+    <select class="govuk-select" id="material-popover-tag-select" name="tag">
+      <option value="">Select a redaction type</option>
+      {% for type in redactionTypes %}
+        <option value="{{ type.value }}">{{ type.text }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="material-popover-note-group" class="govuk-form-group" hidden>
+    <label class="govuk-label" for="material-popover-note">Note</label>
+    <textarea class="govuk-textarea" id="material-popover-note" name="note" rows="2"></textarea>
+  </div>
+
+  <div class="govuk-button-group">
+    <button type="button" class="govuk-button" id="material-popover-redact-button" disabled>Redact this text</button>
+    <button type="button" class="govuk-button govuk-button--secondary" id="material-popover-find-matching-button" disabled>Find matching text</button>
+  </div>
+
+  <a href="#" class="govuk-link" id="material-popover-cancel-link">Cancel</a>
+</div>
+
+{# Sticky action bar — shown once at least one redaction has been made on
+   the current document. Remove all/Save all are illustrative only, not
+   wired up. Width/position matched to #material-viewer by
+   material-redact-popover.js, not fixed here, since the viewer's own
+   width varies (full-width toggle, responsive layout). #}
+<div class="dcf-material-redact-footer" id="dcf-material-redact-footer" hidden>
+  <a href="#" class="govuk-link" id="dcf-material-redact-remove-all">Remove all redactions</a>
+  <span class="govuk-body govuk-!-margin-bottom-0" id="dcf-material-redact-count">There is 1 redaction</span>
+  <button type="button" class="govuk-button govuk-!-margin-bottom-0" id="dcf-material-redact-save-all">Save all redactions</button>
+</div>
