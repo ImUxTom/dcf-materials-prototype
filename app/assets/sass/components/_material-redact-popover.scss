@@ -1,0 +1,58 @@
+/* ======================================================================
+   Materials viewer "Redact this document" popover + sticky footer. The
+   popover card itself reuses .dcf-redact-popover (see
+   _redact-popover.scss) — this file only covers what's specific to the
+   materials context: the toolbar button's active state, and the sticky
+   action bar shown once a redaction has been made.
+   ====================================================================== */
+
+// Visual cue that redact mode is on, matching the toolbar's existing
+// secondary-button styling rather than introducing a new colour.
+.dcf-btn-redact--active {
+  background-color: govuk-colour("dark-grey");
+  color: govuk-colour("white");
+
+  &:hover {
+    background-color: govuk-colour("black");
+  }
+}
+
+// Positioned via JS (left/width matched to #material-viewer's own
+// bounding rect — see material-redact-popover.js) rather than fixed here,
+// since the viewer's width varies (full-width toggle, responsive layout).
+.dcf-material-redact-footer {
+  position: fixed;
+  bottom: 0;
+  z-index: 1500;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(4);
+
+  background: govuk-colour("white");
+  border-top: 1px solid govuk-colour("mid-grey");
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  padding: govuk-spacing(3) govuk-spacing(4);
+}
+
+// Same [hidden]-override problem documented in _redact-popover.scss for
+// #popover-edit-actions — this rule's own `display: flex` above is an
+// author-stylesheet rule, which beats the browser's default
+// `[hidden] { display: none }` user-agent rule regardless of specificity.
+.dcf-material-redact-footer[hidden] {
+  display: none;
+}
+
+// govuk-frontend's .govuk-button defaults to width:100%, meant for a
+// button spanning a full-width page column — inside this flex footer, a
+// 100%-width flex child pushes the whole bar wider than its own fixed
+// `width` (set by material-redact-popover.js to match #material-viewer).
+// Same fix as _redact-popover.scss already applies to the popover's own
+// buttons for the identical reason.
+.dcf-material-redact-footer .govuk-button {
+  width: auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin-bottom: 0;
+}

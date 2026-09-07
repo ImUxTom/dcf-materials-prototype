@@ -10,6 +10,18 @@
 
   {{ govukBackLink({ text: "Back", href: "/cases/" + _case.id + "/details#case-outline" }) }}
 
+  {% if hasNoRedactionsError %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: "You must redact the text before you continue" }],
+          classes: "dcf-tag-error-summary"
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+
   <span class="govuk-caption-m">{{ _case.reference }} - Redact summary of circumstances on offence(s)</span>
   <h1 class="govuk-heading-l">Redact summary of circumstances</h1>
 
@@ -25,10 +37,23 @@
         text: "You can request the police to make changes by adding a 'Factual Summary Confidential Information Request' action point to your Action Plan."
       }) }}
 
-      {% include "_shared/_includes/case/outline/redact-paragraphs.njk" %}
+      {# Wraps the redactable text and the Continue button together —
+         govuk-form-group--error's red left border marks the whole area
+         that needs attention, not a single input (there isn't one to
+         point an error message at, since this is a free drag-selection
+         over running text, not a form field). #}
+      <div class="govuk-form-group{{ ' govuk-form-group--error' if hasNoRedactionsError }}">
+        {% if hasNoRedactionsError %}
+          <p class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> You must redact the text before you continue
+          </p>
+        {% endif %}
 
-      {% set variant = 'v3' %}
-      {% include "_shared/_includes/case/outline/redactions-table.njk" %}
+        {% include "_shared/_includes/case/outline/redact-paragraphs.njk" %}
+
+        {% set variant = 'v3' %}
+        {% include "_shared/_includes/case/outline/redactions-table.njk" %}
+      </div>
 
     </div>
   </div>

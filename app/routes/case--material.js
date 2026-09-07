@@ -3,6 +3,7 @@ const _ = require('lodash')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const documentTypes = require('../data/document-types')
+const redactionTypes = require('../data/redaction-types')
 
 const path = require('path')
 const fs = require('fs').promises
@@ -214,7 +215,8 @@ module.exports = router => {
       selectedFilters,
       assetFiles,
       assetFileLinks,
-      activeTab
+      activeTab,
+      redactionTypes
     })
   })
 

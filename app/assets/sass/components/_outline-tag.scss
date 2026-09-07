@@ -236,3 +236,13 @@
     padding-bottom: govuk-spacing(2);
   }
 }
+
+// v3's "you must redact before continuing" error summary — the list item
+// has no href (there's no single input to link to; see index-v3.html),
+// so it renders as plain text rather than govuk-frontend's usual link
+// styling. Bolded and coloured to match the inline govuk-error-message
+// treatment shown against the text itself further down the page.
+.dcf-tag-error-summary .govuk-error-summary__list li {
+  font-weight: bold;
+  color: govuk-colour("red");
+}
