@@ -475,6 +475,12 @@ function buildTagViewData (outlineEdit, editIds, editReturnTo) {
     ? [{ text: 'Enter a note', href: '#redact-note' }]
     : []
 
+  // One-time flash, same convention as noteErrorFlag above — set by
+  // POST /outline/tag (v3 only) when Continue was pressed with nothing
+  // redacted yet.
+  const hasNoRedactionsError = !!outlineEdit.noRedactionsError
+  delete outlineEdit.noRedactionsError
+
   return {
     paragraphs,
     redactionTypes,
@@ -487,7 +493,8 @@ function buildTagViewData (outlineEdit, editIds, editReturnTo) {
     documentText: outlineEdit.before,
     modalState,
     errorSummary,
-    groupedRedactions
+    groupedRedactions,
+    hasNoRedactionsError
   }
 }
 
@@ -1491,7 +1498,15 @@ module.exports = router => {
     // The check screen recomputes its rows and the commit live from
     // outlineEdit.tags each time, so changes can be left untagged/removed
     // here without blocking progress — no "everything must be tagged"
-    // gate needed for any variant.
+    // gate needed for any variant. v3 is the one exception: it shouldn't
+    // be possible to reach the check screen having made zero redactions
+    // at all (there'd be nothing to check). Scoped to v3 only for now —
+    // v2/v4 are exploratory variants, not touched here.
+    if (req.body.variant === 'v3' && !(outlineEdit.tags && Object.keys(outlineEdit.tags).length)) {
+      outlineEdit.noRedactionsError = true
+      return req.session.save(() => res.redirect(tagPath(caseId, req.body.variant)))
+    }
+
     res.redirect(checkPath(caseId, req.body.variant))
   })
 
