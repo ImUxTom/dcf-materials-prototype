@@ -1,21 +1,12 @@
 /* ======================================================================
-   Materials viewer "Redact this document" popover + sticky footer. The
-   popover card itself reuses .dcf-redact-popover (see
-   _redact-popover.scss) — this file only covers what's specific to the
-   materials context: the toolbar button's active state, and the sticky
+   Materials viewer redact popover + sticky footer. Triggered
+   unconditionally by drag-selecting text in the document (see
+   material-redact-popover.js) — same as the factual summary's redact
+   popover, no separate "enter redact mode" button. The popover card
+   itself reuses .dcf-redact-popover (see _redact-popover.scss) — this
+   file only covers what's specific to the materials context: the sticky
    action bar shown once a redaction has been made.
    ====================================================================== */
-
-// Visual cue that redact mode is on, matching the toolbar's existing
-// secondary-button styling rather than introducing a new colour.
-.dcf-btn-redact--active {
-  background-color: govuk-colour("dark-grey");
-  color: govuk-colour("white");
-
-  &:hover {
-    background-color: govuk-colour("black");
-  }
-}
 
 // Positioned via JS (left/width matched to #material-viewer's own
 // bounding rect — see material-redact-popover.js) rather than fixed here,
