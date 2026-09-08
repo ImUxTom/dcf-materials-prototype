@@ -2,14 +2,35 @@
   var viewer = document.getElementById('material-viewer')
   if (!viewer) return
 
-  // The standalone "Redact this document" button (and the popover it used
-  // to gate) has been removed for now — drag-selecting text in the
-  // document triggers the redact popover unconditionally instead (see
-  // material-redact-popover.js), matching how the factual summary's
-  // redact popover has no separate "enter redact mode" step either.
-  // Reserved for reintroduction in a future version as the trigger for an
-  // external redaction tool, opened in a new tab, rather than this
-  // in-page popover.
+  // ?redactHandoff=1 (see case--material.js) reinstates "Redact this
+  // document" as a handoff to an external redaction tool, opened in a new
+  // tab, instead of the in-page drag-select popover (material-redact-
+  // popover.js — not even loaded on this page in handoff mode, see
+  // material-panel.njk). Default (no flag): no standalone button at all —
+  // drag-selecting text triggers the popover unconditionally instead.
+  // ?tab=3 lands directly on that app's "Review and redact" tab — its own
+  // housekeeping.js reads a `tab` URL parameter on load and calls
+  // showTabByNumber(3), the same number its own click handler derives
+  // from the "tab-3-content" class on that tab's link.
+  var HANDOFF_URL = 'https://casework-housekeeping-merge-85fd6f0cf819.herokuapp.com/version-1-3/A-index?tab=3'
+  var isHandoff = !!window.__DCF_REDACT_HANDOFF__
+
+  function injectRedactHandoffLink (toolbarRight) {
+    if (toolbarRight.querySelector('[data-action="redact-document"]')) return
+    var docActions = toolbarRight.querySelector('details[data-menu="document"]')
+    if (!docActions) return
+
+    var link = document.createElement('a')
+    link.href = HANDOFF_URL
+    link.target = '_blank'
+    link.rel = 'noopener'
+    link.className = 'govuk-button govuk-button--secondary govuk-!-margin-bottom-0 govuk-!-margin-right-3'
+    link.setAttribute('data-action', 'redact-document')
+    link.textContent = 'Redact this document'
+
+    toolbarRight.insertBefore(link, docActions)
+  }
+
   function injectAiRedactionMenuItem (toolbarRight) {
     var list = toolbarRight.querySelector('.dcf-action-menu__list')
     if (!list || list.querySelector('[data-action="ai-redact-document"]')) return
@@ -22,14 +43,30 @@
 
   var observer = new MutationObserver(function () {
     var toolbarRight = viewer.querySelector('.dcf-viewer__toolbar-right')
-    if (toolbarRight) injectAiRedactionMenuItem(toolbarRight)
+    if (toolbarRight) {
+      if (isHandoff) injectRedactHandoffLink(toolbarRight)
+      injectAiRedactionMenuItem(toolbarRight)
+    }
   })
   observer.observe(viewer, { childList: true, subtree: true })
 
   viewer.addEventListener('click', function (e) {
+    // material-viewer.js's own delegated click handler matches any
+    // [data-action] element and calls e.preventDefault() unconditionally
+    // before checking which action it is, then does nothing for actions
+    // it doesn't recognise (both of these are exactly that) — so the
+    // anchors' native href/target behaviour never fires. Doing the
+    // navigation explicitly in JS here works regardless, since an
+    // earlier preventDefault() on the event doesn't stop other listeners
+    // from running.
+    var handoffLink = e.target.closest('[data-action="redact-document"]')
+    if (handoffLink) {
+      window.open(HANDOFF_URL, '_blank', 'noopener')
+      return
+    }
+
     var aiLink = e.target.closest('[data-action="ai-redact-document"]')
     if (!aiLink) return
-    e.preventDefault()
 
     var activeTab = viewer.querySelector('.dcf-doc-tab.is-active')
     if (!activeTab) return
