@@ -15,6 +15,10 @@
   var HANDOFF_URL = 'https://casework-housekeeping-merge-85fd6f0cf819.herokuapp.com/version-1-3/A-index?tab=3'
   var isHandoff = !!window.__DCF_REDACT_HANDOFF__
 
+  // Standalone toolbar button — commented out of the injection call below
+  // (not deleted) so it can be flipped back on quickly for a stakeholder
+  // demo/comparison. "Redact" inside the Document actions menu (see
+  // injectRedactMenuItem) is the live entry point for now.
   function injectRedactHandoffLink (toolbarRight) {
     if (toolbarRight.querySelector('[data-action="redact-document"]')) return
     var docActions = toolbarRight.querySelector('details[data-menu="document"]')
@@ -31,6 +35,20 @@
     toolbarRight.insertBefore(link, docActions)
   }
 
+  // Same handoff as injectRedactHandoffLink above, just as the first item
+  // in the Document actions menu instead of a separate toolbar button —
+  // shares its data-action="redact-document", so the existing click
+  // handler below already covers it with no extra wiring.
+  function injectRedactMenuItem (toolbarRight) {
+    var list = toolbarRight.querySelector('.dcf-action-menu__list')
+    if (!list || list.querySelector('[data-action="redact-document"]')) return
+
+    var item = document.createElement('li')
+    item.className = 'dcf-action-menu__item'
+    item.innerHTML = '<a href="' + HANDOFF_URL + '" target="_blank" rel="noopener" class="govuk-link dcf-action-menu__link" data-action="redact-document">Redact</a>'
+    list.insertBefore(item, list.firstChild)
+  }
+
   function injectAiRedactionMenuItem (toolbarRight) {
     var list = toolbarRight.querySelector('.dcf-action-menu__list')
     if (!list || list.querySelector('[data-action="ai-redact-document"]')) return
@@ -44,7 +62,8 @@
   var observer = new MutationObserver(function () {
     var toolbarRight = viewer.querySelector('.dcf-viewer__toolbar-right')
     if (toolbarRight) {
-      if (isHandoff) injectRedactHandoffLink(toolbarRight)
+      // if (isHandoff) injectRedactHandoffLink(toolbarRight)
+      if (isHandoff) injectRedactMenuItem(toolbarRight)
       injectAiRedactionMenuItem(toolbarRight)
     }
   })
