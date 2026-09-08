@@ -58,14 +58,13 @@
   {% set summaryDateKey = "Added on 24 May 2026" %}
 {% endif %}
 
-{# "Edit" links to the same edit textarea, skipping the check/CYA step and
-   committing immediately on submit — see POST /outline/edit/v6. Unlike the
-   earlier v5 no-CYA route (still in the codebase, just unlinked here), v6
-   never freezes factualSummaryOriginal, so an edit made through it doesn't
-   trigger the Key/highlight rendering below. #}
+{# "Edit" (links to the same edit textarea, skipping the check/CYA step
+   and committing immediately on submit — see POST /outline/edit/v6) is
+   no longer needed for MVP — removed from the live actions for now. Still
+   reachable directly at /outline/edit?variant=v6 if needed; just not
+   surfaced as a button here. #}
 {% set summaryCardActionItems = [
-  { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" },
-  { text: "Edit", href: "/cases/" + _case.id + "/outline/edit?variant=v6", visuallyHiddenText: "summary of circumstances of offence(s)" }
+  { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" }
 ] %}
 
 {# ?showAllVariants=1 exposes the exploratory redact/edit variants (v2/v4
