@@ -63,11 +63,15 @@
    no longer needed for MVP — removed from the live actions for now. Still
    reachable directly at /outline/edit?variant=v6 if needed; just not
    surfaced as a button here. #}
+{# v7 is the MVP redact flow — single redaction at a time, no bulk
+   matching (that's gone to the backlog for post-MVP — see
+   index-v7.html). v3, the fuller bulk-capable design it replaced here,
+   is kept unmodified and moved into the exploratory variants below. #}
 {% set summaryCardActionItems = [
-  { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" }
+  { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v7", visuallyHiddenText: "summary of circumstances of offence(s)" }
 ] %}
 
-{# ?showAllVariants=1 exposes the exploratory redact/edit variants (v2/v4
+{# ?showAllVariants=1 exposes the exploratory redact/edit variants (v2/v3/v4
    redact, v3/v5 edit) as extra action links on this card — testing-only,
    same idea as the footer's reset links, so they're reachable without
    permanently commenting them in and out of this template. Linked from
@@ -75,6 +79,7 @@
 {% if query.showAllVariants %}
   {% set summaryCardActionItems = summaryCardActionItems.concat([
     { text: "Redact (v2, popover)", href: "/cases/" + _case.id + "/outline/tag/v2", visuallyHiddenText: "summary of circumstances of offence(s)" },
+    { text: "Redact (v3, bulk-capable)", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" },
     { text: "Redact (v4, side modal)", href: "/cases/" + _case.id + "/outline/tag/v4", visuallyHiddenText: "summary of circumstances of offence(s)" },
     { text: "Edit (v3, edit-then-CYA)", href: "/cases/" + _case.id + "/outline/edit", visuallyHiddenText: "summary of circumstances of offence(s)" },
     { text: "Edit (v5, no CYA, freezes baseline)", href: "/cases/" + _case.id + "/outline/edit?variant=v5", visuallyHiddenText: "summary of circumstances of offence(s)" }
