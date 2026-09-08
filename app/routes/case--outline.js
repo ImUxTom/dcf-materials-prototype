@@ -1519,7 +1519,33 @@ module.exports = router => {
       outlineEdit.selections = outlineEdit.selections.filter(s => !numericIds.includes(s.id))
     }
 
-    const redirectPath = req.body.returnTo || tagPath(caseId, req.body.variant)
+    const variant = req.body.variant
+    let redirectPath = req.body.returnTo || tagPath(caseId, variant)
+
+    // v3/v7 require at least one redaction before check.html is reachable
+    // (see POST /outline/tag below) — but Remove reopened via check.html's
+    // "Change" link redirects via returnTo, which points straight back at
+    // check.html and bypasses that gate entirely. If this Remove just took
+    // the case back to zero redactions, don't bounce there with nothing
+    // left to check — send them back to the tag page instead, with the
+    // same "you must redact before you continue" error Continue already
+    // enforces.
+    //
+    // Scoped to only fire when returnTo was actually set — i.e. this
+    // Remove came via that check.html round trip. The tag page's own
+    // in-context Remove links (redactions-table.njk) never send returnTo
+    // and already just stay on the tag page; validating there too would
+    // mean showing a "you must continue" error mid-edit, before the user's
+    // even tried to move on — the wrong mental model for a plain edit.
+    const requiresAtLeastOne = variant === 'v3' || variant === 'v7'
+    const hasAnyLeft = !!(outlineEdit.tags && Object.keys(outlineEdit.tags).length)
+    const wasHeadingToCheck = !!req.body.returnTo
+
+    if (requiresAtLeastOne && !hasAnyLeft && wasHeadingToCheck) {
+      outlineEdit.noRedactionsError = true
+      redirectPath = tagPath(caseId, variant)
+    }
+
     req.session.save(() => res.redirect(redirectPath))
   })
 

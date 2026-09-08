@@ -119,7 +119,12 @@
       </div>
 
       <div id="popover-initial-actions"{{ ' hidden' if (modalState and modalState.changeId) }}>
-        <button type="submit" name="scope" value="single" class="govuk-button" id="popover-redact-button" disabled>Redact this text</button>
+        <button type="submit" name="scope" value="single" class="govuk-button govuk-!-margin-bottom-3" id="popover-redact-button" disabled>Redact this text</button>
+        {# Not wired up yet — a plain copy-to-clipboard shortcut for users who
+           want the text for their own workflow rather than to redact it.
+           Always enabled: it doesn't depend on a redaction type being
+           selected. A regular <a> for now since it's inert. #}
+        <a href="#" class="govuk-body govuk-link" id="popover-copy-text-button">Copy text</a>
       </div>
 
       <div class="govuk-button-group" id="popover-edit-actions"{{ ' hidden' if not (modalState and modalState.changeId) }}>
