@@ -16,7 +16,6 @@
     var countEl = document.getElementById('dcf-material-redact-count')
 
     var iframe = null
-    var redactModeOn = false
     var currentItemId = null
     var redactionCount = 0
     var pendingRange = null // cloned Range from the iframe, captured on mouseup
@@ -194,9 +193,6 @@
     document.addEventListener('click', function (e) {
       if (!isPopoverOpen()) return
       if (popover.contains(e.target)) return
-      // Re-clicking the redact toggle button is handled by its own
-      // handler (material-redact.js) — don't fight it here.
-      if (e.target.closest && e.target.closest('[data-action="redact-document"]')) return
       closePopover()
     })
 
@@ -210,8 +206,6 @@
     // ------------------------------------------------------------------
 
     function onIframeMouseUp () {
-      if (!redactModeOn) return
-
       var sel = iframe.contentWindow.getSelection()
       if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
 
@@ -325,36 +319,28 @@
     }
 
     // ------------------------------------------------------------------
-    // Redact-mode toggle — entry point called from material-redact.js
+    // Self-initialising — drag-selecting text works unconditionally
+    // whenever a document is open, same as the factual summary's redact
+    // popover (no "enter redact mode" step). The iframe doesn't exist
+    // until a document is first opened, so this watches for it to appear
+    // rather than waiting on a button click.
     // ------------------------------------------------------------------
 
-    function setRedactMode (on, button) {
-      redactModeOn = on
-      if (button) {
-        button.classList.toggle('dcf-btn-redact--active', on)
-        button.setAttribute('aria-pressed', String(on))
-      }
-      if (!on) closePopover()
+    function bindIframeOnceReady () {
+      var found = viewer.querySelector('.dcf-viewer__frame')
+      if (!found || found === iframe) return
+
+      iframe = found
+      if (iframe.dataset.redactPopoverBound) return
+      iframe.dataset.redactPopoverBound = 'true'
+      iframe.addEventListener('load', onIframeLoad)
+      // The iframe may already have finished loading its current document
+      // by the time this observer first sees it.
+      onIframeLoad()
     }
 
-    function toggle (button) {
-      iframe = viewer.querySelector('.dcf-viewer__frame')
-      if (!iframe) return
-
-      if (!iframe.dataset.redactPopoverBound) {
-        iframe.dataset.redactPopoverBound = 'true'
-        iframe.addEventListener('load', onIframeLoad)
-        // The iframe may already have finished loading its current
-        // document by the time redact mode is first switched on.
-        onIframeLoad()
-      }
-
-      var itemId = activeTabItemId()
-      if (itemId !== currentItemId) resetForNewDocument()
-
-      setRedactMode(!redactModeOn, button)
-    }
-
-    window.DCFMaterialRedactPopover = { toggle: toggle }
+    var iframeObserver = new MutationObserver(bindIframeOnceReady)
+    iframeObserver.observe(viewer, { childList: true, subtree: true })
+    bindIframeOnceReady()
   })
 })()

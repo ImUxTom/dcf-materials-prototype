@@ -216,7 +216,12 @@ module.exports = router => {
       assetFiles,
       assetFileLinks,
       activeTab,
-      redactionTypes
+      redactionTypes,
+      // ?redactHandoff=1 — the "Redact this document" button reinstated,
+      // triggering a handoff to an external redaction tool in a new tab
+      // instead of this in-page popover (see material-redact.js /
+      // material-redact-popover.js). Reached from /prototype-menu.
+      redactHandoff: req.query.redactHandoff === '1'
     })
   })
 

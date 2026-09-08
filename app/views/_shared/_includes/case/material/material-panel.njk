@@ -6,17 +6,24 @@
   {# Notes side-tray modal for materials viewer #}
   {% include "_shared/_includes/case/material/notes-modal.njk" %}
 
-  {# Redact popover + sticky footer for the materials viewer's "Redact
-     this document" button #}
-  {% include "_shared/_includes/case/material/material-redact-popover.njk" %}
+  {# Redact popover + sticky footer, triggered by drag-selecting text —
+     not used at all in the ?redactHandoff=1 variant, where "Redact this
+     document" hands off to an external tool instead (see
+     material-redact.js). #}
+  {% if not redactHandoff %}
+    {% include "_shared/_includes/case/material/material-redact-popover.njk" %}
+  {% endif %}
 
 {% endblock %}
 
 {% block pageScripts %}
+  <script>window.__DCF_REDACT_HANDOFF__ = {{ redactHandoff | dump | safe }};</script>
   <script src="/public/javascripts/utils/govuk-date.js" defer></script>
   <script src="/public/javascripts/components/material-search.js" defer></script>
   <script src="/public/javascripts/components/material-viewer.js" defer></script>
   <script src="/public/javascripts/components/material-redact.js" defer></script>
-  <script src="/public/javascripts/components/material-redact-popover.js" defer></script>
+  {% if not redactHandoff %}
+    <script src="/public/javascripts/components/material-redact-popover.js" defer></script>
+  {% endif %}
 {% endblock %}
 

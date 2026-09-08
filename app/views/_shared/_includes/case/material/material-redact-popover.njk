@@ -1,12 +1,18 @@
 {# _shared/_includes/case/material/material-redact-popover.njk
 
-   Redact popover for the materials viewer's "Redact this document" button
-   (see material-redact.js/material-redact-popover.js) — same interaction
-   shape as the factual summary's redact popover (dcf-redact-popover), just
+   Redact popover for the materials viewer, triggered unconditionally by
+   drag-selecting text in the document (see material-redact-popover.js) —
+   same interaction shape as the factual summary's redact popover
+   (dcf-redact-popover), no separate "enter redact mode" step, just
    working against a selection made inside the PDF.js iframe rather than
    same-document HTML text. Deliberately outside #material-viewer (see
    material-panel.njk) so material-viewer.js's innerHTML rebuilds never
    wipe it.
+
+   The standalone "Redact this document" toolbar button that used to
+   launch this is removed for now (see material-redact.js) — reserved for
+   reintroduction in a future version as the trigger for an external
+   redaction tool opened in a new tab, rather than this in-page popover.
 
    Single document/tab at a time — no cross-document "redact all matching"
    here (that's illustrated in the factual summary version instead), so

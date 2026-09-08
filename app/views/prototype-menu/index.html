@@ -22,39 +22,64 @@
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
-    <h3 class="govuk-heading-s">Materials, Generate CPS documents, Disclosure, Add and Edit Charges</h3>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>Generate CPS documents and Disclosure are found in Materials</li>
-      <li>Add and Edit Charges are found in the Defendants tab in Details</li>
-    </ul>
-
+    <h2 class="govuk-heading-m">Case overview</h2>
+    <p class="govuk-body">Case overview as enrty point and other navigation categories and tabs. Generate CPS documents and Disclosure are also found within Materials.</p>
     <p class="govuk-body"><a class="govuk-link" href="/cases/1/details">Go to case overview</a></p>
 
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">Materials</h2>
+    <p class="govuk-body">Generate CPS documents and Disclosure are also found within Materials.</p>
+
+    <h3 class="govuk-heading-s">Redaction MVP - handoff to Casework App</h3>
+    <p class="govuk-body">"Redact this document", opens Casework App redaction in a new tab instead of the in-page popover.</p>
+    <p class="govuk-body"><a class="govuk-link" href="/cases/1/material?redactHandoff=1">Go to Materials</a></p>
+
+    <h3 class="govuk-heading-s">Redaction - Future variant</h3>
+    <p class="govuk-body">Drag-selecting text in a document triggers the redact popover. No need to handoff to CWA</p>
+    <p class="govuk-body"><a class="govuk-link" href="/cases/1/material">Go to Materials</a></p>
+
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">Charges</h2>
+    <h3 class="govuk-heading-s">Add charge and Edit charge</h3>
+    <p class="govuk-body">Add charge and Edit charge are triggered from a defendant's card on the Defendants tab.</p>
+    <p class="govuk-body"><a class="govuk-link" href="/cases/1/details#defendants">Go to Defendants tab</a></p>
+
     <h3 class="govuk-heading-s">Edit charge with no victim - Go to CMS classic</h3>
-    <p class="govuk-body">Case 99AA000002/1 - Daniel Ashworth.</p>
     <p class="govuk-body"><a class="govuk-link" href="/cases/2/details#defendants">Go to no victim flow</a></p>
 
-    <h3 class="govuk-heading-s">Indictments</h3>
-    <p class="govuk-body">Case 99AA000001/1 - Victor Danvers and 1 more.</p>
-    <p class="govuk-body"><a class="govuk-link" href="/cases/1/indictment">Go to indictments flow</a></p>
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">Indictments</h2>
     
+    <p class="govuk-body"><a class="govuk-link" href="/cases/1/indictment">Go to indictments flow</a></p>
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
-    <h2 class="govuk-heading-m">Factual summary - Redact and Edit</h2>
-    <p class="govuk-body">Case 19P896072/7 - Norman Harris and 2 more.</p>
+    <h2 class="govuk-heading-m">Factual summary - Redact structured data</h2>
+    {# <p class="govuk-body">Case 19P896072/7 - Norman Harris and 2 more.</p> #}
 
     <h3 class="govuk-heading-s">MVP</h3>
-    <p class="govuk-body">Both Redact and Edit are triggered from the summary card actions on the case's Outline tab</p>
-    
-     <p class="govuk-body"><a class="govuk-link" href="/cases/685/details#case-outline">Go to redact and edit</a></p>
-    
+    <p class="govuk-body">Redact is triggered from the summary card actions on the case's Outline tab - single redaction at a time, no bulk matching.</p>
+
+     <p class="govuk-body"><a class="govuk-link" href="/cases/685/details#case-outline">Go to factual summary</a></p>
+
 
     <h3 class="govuk-heading-s">Beyond MVP and exploratory variants</h3>
-    <p class="govuk-body">These variants aren't linked from the live summary card by default - <code>?showAllVariants=1</code> exposes them as extra action links there (Redact v2/v4, Edit v3/v5), alongside the MVP Redact & Edit actions.</p>
-    <p class="govuk-body"><a class="govuk-link" href="/cases/685/details?showAllVariants=1#case-outline">Go to exploratory variants</a></p>
+    <p class="govuk-body">Not linked from the live summary card by default - <code>?showAllVariants=1</code> exposes them as extra action links there, alongside the MVP Redact action:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Redact (v2, popover)</li>
+      <li>Redact (v3, bulk-capable) - Find matching text, Redact all + bulk counter</li>
+      <li>Redact (v4, side modal)</li>
+      <li>Edit (v3, edit-then-CYA)</li>
+      <li>Edit (v5, no CYA, freezes baseline)</li>
+    </ul>
+    <p class="govuk-body"><a class="govuk-link" href="/cases/685/details?showAllVariants=1#case-outline">Go to post-MVP variants</a></p>
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
 
     <h2 class="govuk-heading-m">Useful links</h2>
     <ul class="govuk-list govuk-list--bullet">

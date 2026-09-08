@@ -152,8 +152,13 @@ function splitIntoParagraphs (parts) {
   return paragraphs.filter(paragraph => paragraph.length)
 }
 
-const TAG_VARIANTS = ['v2', 'v3', 'v4']
-const CHECK_VARIANTS = [null, 'v2', 'v3', 'v4']
+// v7: single-redaction-at-a-time MVP variant — v3 minus the bulk features
+// (Find matching text/View previous/View next/Redact all), deferred to
+// the backlog for post-MVP. v3 itself is kept, unmodified, as an
+// exploratory reference for that fuller design (see outline-panels.njk /
+// prototype-menu).
+const TAG_VARIANTS = ['v2', 'v3', 'v4', 'v7']
+const CHECK_VARIANTS = [null, 'v2', 'v3', 'v4', 'v7']
 
 // Builds the tag-screen URL for a given variant, falling back to the
 // default screen if the variant isn't recognised.
@@ -1102,6 +1107,37 @@ module.exports = router => {
     res.render('v2/cases/outline/tag/index-v3', { _case, ...buildTagViewData(outlineEdit, editIds, editReturnTo) })
   })
 
+  // v7: the MVP redact flow — identical to v3 (same lazy select-mode
+  // start, same buildTagViewData/commit logic), just rendering the
+  // single-redaction-at-a-time template (no Find matching text/View
+  // previous/View next/Redact all — see index-v7.html). v3 itself is
+  // kept as-is, unlinked from the live summary card, as a reference for
+  // that fuller bulk-capable design.
+  router.get('/cases/:caseId/outline/tag/v7', async (req, res) => {
+    const caseId = parseInt(req.params.caseId)
+    let outlineEdit = req.session.data.outlineEdit
+
+    const _case = await prisma.case.findUnique({ where: { id: caseId }, include: { defendants: true } })
+
+    if (!outlineEdit || outlineEdit.mode !== 'select') {
+      outlineEdit = {
+        mode: 'select',
+        before: _case.factualSummary || '',
+        after: _case.factualSummary || '',
+        selections: [],
+        tags: {}
+      }
+      req.session.data.outlineEdit = outlineEdit
+    }
+
+    const editIds = req.query.changeId
+      ? String(req.query.changeId).split(',').filter(Boolean)
+      : null
+    const editReturnTo = req.query.returnTo || ''
+
+    res.render('v2/cases/outline/tag/index-v7', { _case, ...buildTagViewData(outlineEdit, editIds, editReturnTo) })
+  })
+
   // v4 skips the edit textarea entirely — "Redact" on the case details page
   // links straight here. Same as v2/v3: lazily starts a fresh
   // selection-mode session against the current factualSummary if one isn't
@@ -1278,7 +1314,7 @@ module.exports = router => {
   // /v4/select (looped, like CHECK_VARIANTS.forEach elsewhere) since the
   // logic itself has never been variant-specific — only the redirect
   // targets need to know which variant they're for.
-  ;['v2', 'v3', 'v4'].forEach(variant => {
+  ;['v2', 'v3', 'v4', 'v7'].forEach(variant => {
     router.post(`/cases/:caseId/outline/tag/${variant}/select`, (req, res) => {
       const caseId = parseInt(req.params.caseId)
       const outlineEdit = req.session.data.outlineEdit
@@ -1483,7 +1519,33 @@ module.exports = router => {
       outlineEdit.selections = outlineEdit.selections.filter(s => !numericIds.includes(s.id))
     }
 
-    const redirectPath = req.body.returnTo || tagPath(caseId, req.body.variant)
+    const variant = req.body.variant
+    let redirectPath = req.body.returnTo || tagPath(caseId, variant)
+
+    // v3/v7 require at least one redaction before check.html is reachable
+    // (see POST /outline/tag below) — but Remove reopened via check.html's
+    // "Change" link redirects via returnTo, which points straight back at
+    // check.html and bypasses that gate entirely. If this Remove just took
+    // the case back to zero redactions, don't bounce there with nothing
+    // left to check — send them back to the tag page instead, with the
+    // same "you must redact before you continue" error Continue already
+    // enforces.
+    //
+    // Scoped to only fire when returnTo was actually set — i.e. this
+    // Remove came via that check.html round trip. The tag page's own
+    // in-context Remove links (redactions-table.njk) never send returnTo
+    // and already just stay on the tag page; validating there too would
+    // mean showing a "you must continue" error mid-edit, before the user's
+    // even tried to move on — the wrong mental model for a plain edit.
+    const requiresAtLeastOne = variant === 'v3' || variant === 'v7'
+    const hasAnyLeft = !!(outlineEdit.tags && Object.keys(outlineEdit.tags).length)
+    const wasHeadingToCheck = !!req.body.returnTo
+
+    if (requiresAtLeastOne && !hasAnyLeft && wasHeadingToCheck) {
+      outlineEdit.noRedactionsError = true
+      redirectPath = tagPath(caseId, variant)
+    }
+
     req.session.save(() => res.redirect(redirectPath))
   })
 
@@ -1498,11 +1560,11 @@ module.exports = router => {
     // The check screen recomputes its rows and the commit live from
     // outlineEdit.tags each time, so changes can be left untagged/removed
     // here without blocking progress — no "everything must be tagged"
-    // gate needed for any variant. v3 is the one exception: it shouldn't
+    // gate needed for any variant. v3/v7 are the exception: it shouldn't
     // be possible to reach the check screen having made zero redactions
-    // at all (there'd be nothing to check). Scoped to v3 only for now —
-    // v2/v4 are exploratory variants, not touched here.
-    if (req.body.variant === 'v3' && !(outlineEdit.tags && Object.keys(outlineEdit.tags).length)) {
+    // at all (there'd be nothing to check). v2/v4 are exploratory
+    // variants, not touched here.
+    if ((req.body.variant === 'v3' || req.body.variant === 'v7') && !(outlineEdit.tags && Object.keys(outlineEdit.tags).length)) {
       outlineEdit.noRedactionsError = true
       return req.session.save(() => res.redirect(tagPath(caseId, req.body.variant)))
     }
