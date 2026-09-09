@@ -165,6 +165,22 @@ model Case {
   reportStatus      String?                  // Can be: "In progress" or "Completed", null means "Not started"
   prosecutors       CaseProsecutor[]
   paralegalOfficers CaseParalegalOfficer[]
+  // Audit trail for the History tab — unlike factualSummaryOriginal (a
+  // single frozen snapshot of the very first version, never updated
+  // again), one row is appended here on *every* redact/edit commit,
+  // capturing whatever factualSummary was immediately before that commit
+  // overwrote it. Together they build the full version-by-version timeline
+  // shown on History, not just "the original".
+  factualSummaryVersions FactualSummaryVersion[]
+}
+
+model FactualSummaryVersion {
+  id        Int      @id @default(autoincrement())
+  caseId    Int
+  case      Case     @relation(fields: [caseId], references: [id])
+  text      String
+  action    String   // 'redacted' | 'edited'
+  createdAt DateTime @default(now())
 }
 
 enum ReportStatus {

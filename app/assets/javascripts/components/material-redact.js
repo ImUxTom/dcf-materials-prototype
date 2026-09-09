@@ -1,3 +1,5 @@
+// app/assets/javascripts/components/material-redact.js
+
 (() => {
   var viewer = document.getElementById('material-viewer')
   if (!viewer) return
@@ -45,7 +47,7 @@
 
     var item = document.createElement('li')
     item.className = 'dcf-action-menu__item'
-    item.innerHTML = '<a href="' + HANDOFF_URL + '" target="_blank" rel="noopener" class="govuk-link dcf-action-menu__link" data-action="redact-document">Redact</a>'
+    item.innerHTML = '<a href="' + HANDOFF_URL + '" target="_blank" rel="noopener" class="govuk-link dcf-action-menu__link" data-action="redact-document">Redact this document</a>'
     list.insertBefore(item, list.firstChild)
   }
 
@@ -59,12 +61,22 @@
     list.appendChild(item)
   }
 
+  // Aligns the dropdown to the right edge of the "Document actions"
+  // button instead of the left (see .dcf-action-menu--right in
+  // _dcf-moj-button-menu-fallback.scss) — set here rather than on the
+  // <details> markup itself, which is built in material-viewer.js.
+  function rightAlignDocActionsMenu (toolbarRight) {
+    var docActions = toolbarRight.querySelector('details[data-menu="document"]')
+    if (docActions) docActions.classList.add('dcf-action-menu--right')
+  }
+
   var observer = new MutationObserver(function () {
     var toolbarRight = viewer.querySelector('.dcf-viewer__toolbar-right')
     if (toolbarRight) {
       // if (isHandoff) injectRedactHandoffLink(toolbarRight)
       if (isHandoff) injectRedactMenuItem(toolbarRight)
       injectAiRedactionMenuItem(toolbarRight)
+      rightAlignDocActionsMenu(toolbarRight)
     }
   })
   observer.observe(viewer, { childList: true, subtree: true })
