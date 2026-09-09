@@ -85,6 +85,9 @@ module.exports = router => {
           include: {
             user: true
           }
+        },
+        factualSummaryVersions: {
+          orderBy: { createdAt: 'desc' }
         }
       }
     })
@@ -240,6 +243,9 @@ module.exports = router => {
           include: {
             user: true
           }
+        },
+        factualSummaryVersions: {
+          orderBy: { createdAt: 'desc' }
         }
       }
     })

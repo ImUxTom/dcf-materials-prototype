@@ -745,6 +745,29 @@ async function captureResetSnapshotIfUnset (caseId) {
   return existing.factualSummaryResetSnapshot ? undefined : existing.factualSummary
 }
 
+// Unlike captureOriginalIfUnset/captureResetSnapshotIfUnset (each frozen
+// once, on the very first change, never again), this appends a new row on
+// *every* redact/edit commit — capturing whatever factualSummary was
+// immediately before this particular commit overwrites it. Together, the
+// growing set of rows is the full version-by-version timeline the History
+// tab shows (see history-panel.njk), not just "the original". Must be
+// called before the Prisma update that changes factualSummary, so it
+// captures the pre-change text.
+async function recordFactualSummaryVersion (caseId, action) {
+  const existing = await prisma.case.findUnique({
+    where: { id: caseId },
+    select: { factualSummary: true }
+  })
+
+  await prisma.factualSummaryVersion.create({
+    data: {
+      caseId,
+      text: existing.factualSummary || '',
+      action
+    }
+  })
+}
+
 async function commitOutlineEdit (outlineEdit, caseId, userId) {
   const tags = outlineEdit.tags || {}
   const removed = outlineEdit.removed || {}
@@ -760,6 +783,7 @@ async function commitOutlineEdit (outlineEdit, caseId, userId) {
 
   const originalToSet = await captureOriginalIfUnset(caseId)
   const resetSnapshotToSet = await captureResetSnapshotIfUnset(caseId)
+  await recordFactualSummaryVersion(caseId, 'redacted')
 
   await prisma.case.update({
     where: { id: caseId },
@@ -908,6 +932,7 @@ module.exports = router => {
     if (outlineEdit && action === 'accept') {
       const originalToSet = await captureOriginalIfUnset(caseId)
       const resetSnapshotToSet = await captureResetSnapshotIfUnset(caseId)
+      await recordFactualSummaryVersion(caseId, 'edited')
 
       await prisma.case.update({
         where: { id: caseId },
@@ -955,6 +980,7 @@ module.exports = router => {
     const caseId = parseInt(req.params.caseId)
     const originalToSet = await captureOriginalIfUnset(caseId)
     const resetSnapshotToSet = await captureResetSnapshotIfUnset(caseId)
+    await recordFactualSummaryVersion(caseId, 'edited')
 
     await prisma.case.update({
       where: { id: caseId },
@@ -996,6 +1022,7 @@ module.exports = router => {
   router.post('/cases/:caseId/outline/edit/v6', async (req, res) => {
     const caseId = parseInt(req.params.caseId)
     const resetSnapshotToSet = await captureResetSnapshotIfUnset(caseId)
+    await recordFactualSummaryVersion(caseId, 'edited')
 
     await prisma.case.update({
       where: { id: caseId },
@@ -1259,6 +1286,10 @@ module.exports = router => {
     await prisma.activityLog.deleteMany({
       where: { caseId, model: 'Case', title: 'Factual summary edited' }
     })
+
+    // Same reset as everything else above — otherwise stale versions from
+    // a previous test run would linger on the History tab after a reset.
+    await prisma.factualSummaryVersion.deleteMany({ where: { caseId } })
 
     delete req.session.data.outlineEdit
 

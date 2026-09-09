@@ -16,32 +16,6 @@
 {% endset %}
 
 
-{# {{ govukSummaryList({
-  card: {
-    title: {
-      html: 'Summary of circumstances of offence(s)'
-    },
-    actions: {
-      items: [
-        { text: "Redact (v2)", href: "/cases/" + _case.id + "/outline/tag/v2", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Redact (v4)", href: "/cases/" + _case.id + "/outline/tag/v4", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Edit", href: "/cases/" + _case.id + "/outline/edit", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Edit (v5, no CYA)", href: "/cases/" + _case.id + "/outline/edit?variant=v5", visuallyHiddenText: "summary of circumstances of offence(s)" },
-
-         { text: "Redact", href: "/cases/" + _case.id + "/outline/tag/v3", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Edit", href: "/cases/" + _case.id + "/outline/edit", visuallyHiddenText: "summary of circumstances of offence(s)" },
-        { text: "Edit NO CYA", href: "/cases/" + _case.id + "/outline/edit?variant=v5", visuallyHiddenText: "summary of circumstances of offence(s)" }
-      ]
-      ]
-    }
-  },
-  rows: [
-    { key: { text: "Added on 24 May 2024" }, value: { html: circumstancesDisplayHtml } }
-  ]
-}) }} #}
-
-
 {# V3 EDIT AND REDACT FROM SUMMARY CARD LINKS #}
 {% set editedLabel = "Edited on " + (_case.factualSummaryEditedAt | govukDate) if _case.factualSummaryEditedAt else "" %}
 {% set redactedLabel = "Redacted on " + (_case.factualSummaryRedactedAt | govukDate) if _case.factualSummaryRedactedAt else "" %}

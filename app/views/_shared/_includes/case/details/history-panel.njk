@@ -3,25 +3,43 @@
    Moved out of the Outline tab's "Confidential Information to Prosecutor"
    section per stakeholder feedback — showing the unredacted original text
    there was misleading and the wrong placement. Lives in its own "History"
-   tab instead (see main-tabs.njk). Logic unchanged: only ever appears once
-   factualSummaryOriginal has been frozen by a first edit or redaction (see
-   captureOriginalIfUnset in case--outline.js) — before that, there's
-   nothing to show. #}
-{% if _case.factualSummaryOriginal %}
-  {% set originalCircumstancesHtml %}
-    {% for paragraph in _case.factualSummaryOriginal.split('\n\n') %}
-<p class="govuk-body">{{ paragraph }}</p>
-    {% endfor %}
-  {% endset %}
+   tab instead (see main-tabs.njk).
 
-  {{ govukSummaryList({
-    card: {
-      title: {
-        html: 'Summary of circumstances of offence(s) (unredacted)'
-      }
-    },
-    rows: [
-      { key: { text: "Added on 24 May 2026" }, value: { html: originalCircumstancesHtml } }
-    ]
-  }) }}
+   Renders the full version-by-version audit trail (factualSummaryVersions
+   — see recordFactualSummaryVersion in case--outline.js), not just the
+   original wording: a new row is appended every time a redaction or edit
+   is committed, capturing what the text was immediately before that
+   commit, newest first. Nothing shows until the first commit ever
+   happens, same as before. Wrapped in its own two-thirds column here
+   (unlike outline-panels.njk's cards, which wrap themselves) since this
+   partial owns its whole tab panel. #}
+{% if _case.factualSummaryVersions and _case.factualSummaryVersions.length %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% set versionRows = [] %}
+      {% for version in _case.factualSummaryVersions %}
+        {# redactionEditDisplay, called without an "original" to diff
+           against, just bolds any "[Redacted <type>]" text it finds and
+           splits into <p> paragraphs — same treatment the live Outline
+           card gives the current version, applied here to each past one
+           too, so redactions stay discoverable at a glance. #}
+        {% set actionLabel = "Redacted on " if version.action == 'redacted' else "Edited on " %}
+        {% set versionRows = (versionRows.push({
+          key: { text: actionLabel + (version.createdAt | govukDate) },
+          value: { html: version.text | redactionEditDisplay | safe }
+        }), versionRows) %}
+      {% endfor %}
+
+      {{ govukSummaryList({
+        card: {
+          title: {
+            html: 'Summary of circumstances of offence(s) (previous versions)'
+          }
+        },
+        rows: versionRows
+      }) }}
+
+    </div>
+  </div>
 {% endif %}
