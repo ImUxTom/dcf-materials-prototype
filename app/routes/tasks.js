@@ -5,6 +5,7 @@ const Pagination = require('../helpers/pagination')
 const { groupTasks } = require('../helpers/taskGrouping')
 const { addTimeLimitDates } = require('../helpers/timeLimit')
 const taskNames = require('../data/task-names')
+const pcdTasks = require('../data/pcd-task-list.json')
 
 function resetFilters(req) {
   _.set(req, 'session.data.taskListFilters.owner', null)
@@ -553,10 +554,17 @@ module.exports = router => {
     let pagination = new Pagination(tasks, req.query.page, pageSize)
     tasks = pagination.getData()
 
+    // PCD appeals task list (Task list tab) — static JSON for now, see
+    // app/data/pcd-task-list.json. Independent of the filtering above;
+    // will be reconnected to Prisma once the template layout is signed off.
+    const pcdSeverityCounts = _.countBy(pcdTasks, 'severityBucket')
+
     res.render('tasks/index', {
       tasks,
       pagination,
       totalTasks,
+      pcdTasks,
+      pcdSeverityCounts,
       ownerItems,
       selectedOwnerFilters,
       selectedOwnerItems,
