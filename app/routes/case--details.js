@@ -2,6 +2,7 @@ const _ = require('lodash')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const documentTypes = require('../data/document-types')
+const pcdAppealCases = require('../data/pcd-appeal-cases')
 
 function resetFilters(req) {
   _.set(req, 'session.data.documentListFilters.documentTypes', null)
@@ -159,7 +160,8 @@ module.exports = router => {
       documents,
       documentTypeItems,
       selectedFilters,
-      tasks
+      tasks,
+      pcdAppeal: pcdAppealCases[caseId] || null
     })
   })
 
@@ -291,7 +293,8 @@ module.exports = router => {
       _case,
       documents,
       documentTypeItems,
-      selectedFilters
+      selectedFilters,
+      pcdAppeal: pcdAppealCases[caseId] || null
     })
   })
 
@@ -308,6 +311,29 @@ module.exports = router => {
   router.get('/cases/:caseId/details/clear-search', (req, res) => {
     _.set(req, 'session.data.documentSearch.keywords', '')
     res.redirect(`/cases/${req.params.caseId}/details`)
+  })
+
+  // PCD appeal DCP decision — standalone page (Start task lands here,
+  // matching how every other task type in this app opens its own page
+  // rather than an inline form). No check-your-answers step for now.
+  router.get('/cases/:caseId/pcd-appeal/decision', (req, res) => {
+    const caseId = parseInt(req.params.caseId)
+    const pcdAppeal = pcdAppealCases[caseId]
+    if (!pcdAppeal) return res.redirect(`/cases/${caseId}/details`)
+    res.render('cases/pcd-appeal/decision', { pcdAppeal })
+  })
+
+  // PCD appeal DCP decision — static mock content for now (see
+  // app/data/pcd-appeal-cases.js), so this doesn't persist the decision,
+  // it just confirms the action was taken. The "already decided" state is
+  // demonstrated structurally by case 2002's pre-filled mock data instead.
+  router.post('/cases/:caseId/pcd-appeal/decision', (req, res) => {
+    _.set(req, 'session.data.successBanner', {
+      titleText: 'Decision recorded',
+      text: 'The PCD appeal decision has been recorded.',
+      body: 'A formal MG3A-equivalent document and notification back to police still need to be sent outside this prototype.'
+    })
+    res.redirect(`/cases/${req.params.caseId}/details#overview`)
   })
 
 }

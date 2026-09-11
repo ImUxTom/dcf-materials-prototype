@@ -1,0 +1,85 @@
+{# cases/pcd-appeal/decision.html
+
+   Standalone DCP decision page — Start task on the PCD appeal panel lands
+   here, matching how every other task type in this app opens its own page
+   rather than an inline form (see _shared/_includes/case/details/pcd-appeal.njk).
+   No check-your-answers step for now.
+
+   Scope note: PCD = Pre-Charging Decision appeal only (DG6 paras 4.31–4.34).
+   Post-charge disputes (e.g. bail/remand after charge) are a separate DG6
+   process (paras 10.12–10.13) and are out of scope for this form — see
+   rationale notes for why bail content has been removed rather than kept
+   as an optional section.
+#}
+
+{% extends "_shared/layouts/main.html" %}
+
+{% set bodyClasses = "dcf-materials-wide" %}
+{% set navId = 'cases' %}
+{% set pageName = "PCD appeal decision" %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/cases/" + pcdAppeal.caseId + "/details#overview"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <span class="govuk-caption-l">{{ pageName }}</span>
+      <h1 class="govuk-heading-l">{{ pcdAppeal.urn }} - {{ pcdAppeal.suspects | join(', ') }}</h1>
+
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-6",
+        rows: [
+          { key: { text: "Appealing officer" }, value: { text: pcdAppeal.appeal.appealingOfficer.name + " (" + pcdAppeal.appeal.appealingOfficer.rank + ", " + pcdAppeal.appeal.appealingOfficer.number + ")" } },
+          { key: { text: "Grounds for appeal" }, value: { text: pcdAppeal.appeal.groundsNarrative } }
+        ]
+      }) }}
+
+      <form method="post" action="/cases/{{ pcdAppeal.caseId }}/pcd-appeal/decision">
+
+        {% for charge in pcdAppeal.originalDecision.charges %}
+          {% if charge.appealed %}
+            {{ govukRadios({
+              idPrefix: "decision-" + charge.code,
+              name: "decision-" + charge.code,
+              fieldset: {
+                legend: { text: charge.code + " — " + charge.description, classes: "govuk-fieldset__legend--s" }
+              },
+              items: [
+                { value: "uphold", text: "Reject police appeal — charge not authorised" },
+                { value: "overturn", text: "Accept police appeal — authorise charge" }
+              ]
+            }) }}
+          {% endif %}
+        {% endfor %}
+
+        {{ govukSelect({
+          id: "decision-test-applied",
+          name: "decision-test-applied",
+          label: { text: "Test applied" },
+          items: [
+            { value: "", text: "Select a test" },
+            { value: "full-code", text: "Full Code Test" },
+            { value: "threshold", text: "Threshold Test" }
+          ]
+        }) }}
+
+        {{ govukTextarea({
+          id: "decision-reasoning",
+          name: "decision-reasoning",
+          label: { text: "Reasoning" },
+          hint: { text: "Reference the test applied above." }
+        }) }}
+
+        {{ govukButton({ text: "Submit decision" }) }}
+
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

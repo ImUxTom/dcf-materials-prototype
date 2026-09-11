@@ -88,14 +88,35 @@
 
 .app-task-list__detail-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: govuk-spacing(4);
+
+  a.govuk-link {
+    @include govuk-font($size: 19);
+  }
+}
+
+.app-task-list__detail-actions-group {
+  display: flex;
   align-items: center;
   gap: govuk-spacing(2);
-  margin-bottom: govuk-spacing(4);
+  margin-right: govuk-spacing(4);
 
   .govuk-button {
     margin: 0;
+    @include govuk-font($size: 19);
   }
+}
+
+.app-task-list__detail-link {
+  display: inline-block;
+  @include govuk-font($size: 19);
+  padding: govuk-spacing(2) 0;
+}
+
+.app-task-list__detail-col--left {
+  padding-left: govuk-spacing(4);
 }
 
 .app-task-list__more-toggle {
