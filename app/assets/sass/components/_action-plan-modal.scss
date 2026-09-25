@@ -95,25 +95,33 @@
     @include govuk-font-size($size: 16);
   }
 
-  /* action-plan-card.njk's "Reason for CPS last update" row value: styled
-     as a plain "Show more" link rather than a chevron disclosure, since
-     the marker (plus the padding/left-border reserved to align with it)
-     read as a nested box and felt cramped in the row's narrow value
-     column. Still a real <details> underneath — keyboard and screen
-     reader support come for free — just visually stripped back. */
-  .app-action-plan-reason-details {
-    .govuk-details__summary {
-      padding-left: 0;
+  /* action-plan-card.njk's "Reason for CPS last update" row value:
+     App.TextExpander (text-expander.js) truncates it to "first 3 words…"
+     and appends a toggle button — a <details> component can't do this,
+     since its <summary> always renders before the disclosed content, and
+     "Show less" needs to trail the full text instead. .govuk-body sets
+     its own explicit 19px directly on the paragraph regardless of
+     ancestors, so it needs its own override to land on 16px like the
+     rest of this card's text. */
+  .app-action-plan-reason-preview {
+    @include govuk-font-size($size: 16);
+  }
 
-      &::before {
-        display: none;
-      }
-    }
-
-    .govuk-details__text {
-      padding-left: 0;
-      border-left: none;
-    }
+  // text-expander.js's generic toggle button — styled here (rather than
+  // in a shared stylesheet) so it looks like a GOV.UK link only within
+  // this card, without affecting its other use on the static "Show more"
+  // design-reference page. font: inherit rather than an explicit size,
+  // so it picks up .app-action-plan-reason-preview's 16px above instead
+  // of needing its own override.
+  .app-truncate__link {
+    @include govuk-link-common;
+    @include govuk-link-style-no-visited-state;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
   }
 }
 

@@ -9,18 +9,20 @@
     - category          : string
     - relatedSuspect    : string
     - relatedMaterial   : string
-    - reasonForUpdate   : string — can be long free text, so its row value
-                          is a collapsed details ("Show more") rather than
-                          the text shown outright
+    - reasonForUpdate   : string — can be long free text. js-action-plan-
+                          reason (see action-plan-modal.js) truncates it
+                          client-side to "first 3 words… Show more" and
+                          expands in place to the full text with "Show
+                          less" trailing it, in the same paragraph — see
+                          App.TextExpander (text-expander.js) for why this
+                          needed JS rather than a <details> component
+                          (summary always renders before its content,
+                          so a toggle that trails the full text isn't
+                          achievable natively)
 ------------------------------------------------------------------------- #}
 
 {% set reasonForUpdateHtml %}
-  {% call govukDetails({ summaryText: "Show reason", classes: "app-action-plan-reason-details" }) %}
-    <p class="govuk-body">{{ action.reasonForUpdate }}</p>
-    <p class="govuk-body govuk-!-margin-bottom-0">
-      <a class="govuk-link" href="#">Mark as read<span class="govuk-visually-hidden"> reason for CPS last update for {{ action.type }}</span></a>
-    </p>
-  {% endcall %}
+  <p class="govuk-body app-action-plan-reason-preview govuk-!-margin-bottom-0 js-action-plan-reason">{{ action.reasonForUpdate }}</p>
 {% endset %}
 
 {{ govukSummaryList({
@@ -55,7 +57,12 @@
       { key: { text: "Related material" }, value: { text: action.relatedMaterial } },
       {
         key: { text: "Reason for CPS last update" },
-        value: { html: reasonForUpdateHtml }
+        value: { html: reasonForUpdateHtml },
+        actions: {
+          items: [
+            { href: "#", text: "Mark as read", visuallyHiddenText: "reason for CPS last update for " + action.type }
+          ]
+        }
       }
     ]
   }) }}
