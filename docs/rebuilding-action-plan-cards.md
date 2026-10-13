@@ -1,24 +1,24 @@
----
-title: Rebuilding action plan cards with GOV.UK components
-description: We rebuilt the action plan cards using proper GOV.UK components to fix accessibility problems, and found that each card's actions depend on its status, not its category.
----
+# Redesigning action plan 
 
-The action plan lets users see and manage the actions on a case. Each action was shown as a hand-built block. It had a home-made "Further details" expander and a loose group of buttons next to it.
+The action plan lets users see and manage the action points related to a case. Each action was shown as a custom component combining a summary card, details, and a tag. Inside the details component, there are a number of buttons.
 
-A design review summed it up as a "Frankenstein component" that was poor for accessibility.
+A design review summed it up as poor for accessibility.
 
-This wasn't a research-led piece of work. We started from a design review, a note from research and input from a subject matter expert.
+We rebuilt the action plan cards using proper GOV.UK components to fix accessibility problems, and found that each card’s actions depend on its status, not its category.
+
+This wasn’t a research-led piece of work. We started with a design review and new design with input and support from subject matter experts (SME)
 
 ## Why we did this
 
 The old layout had 4 problems:
 
-- it wasn't built on a real component, so it missed the accessibility features GOV.UK components provide, such as semantic structure and consistent keyboard and focus behaviour
-- it was designed around a single action, but research suggested action plans can run to more than 20 items
-- button labels were inconsistent, and it wasn't clear which buttons applied to the whole action and which applied to a single piece of information
-- we didn't know whether different categories of action (police initiated, pre-charge and post-charge) needed different information or actions
+The old layout had some problems:
 
-An accessibility specialist reviewed the new direction before we built it and confirmed it was sound.
+- it wasn’t built on real component or patterns, so it missed the accessibility features GOV.UK components provide, such as semantic structure and consistent keyboard and focus behaviour.
+- button labels were inconsistent, and it wasn’t clear which buttons applied to the whole action and which applied to a single piece of information
+- we didn’t know whether different categories of action (police initiated, pre-charge and post-charge) needed different information or actions
+
+An accessibility specialist reviewed the new rationale before we started and was comfortable it was an improvement on the current version.
 
 <!-- SCREENSHOT PLACEHOLDER — duplicate as needed -->
 ![Screenshot described under image](screenshot-name.png)
@@ -30,11 +30,11 @@ Describe the screenshot here. Include the page heading, what each section contai
 
 ## What we changed
 
-### Each action is now a summary card
+### Each action is now a summary card from the design system used in the way it's meant to be.
 
 We rebuilt each action as a [summary card](https://design-system.service.gov.uk/components/summary-list/#summary-cards). The card has a title, actions in its header, and a summary list of details.
 
-We also built a second version using a plain [summary list](https://design-system.service.gov.uk/components/summary-list/), without the card styling. We haven't chosen between them yet, so both versions stay in the prototype.
+We also built a second version using a plain [summary list](https://design-system.service.gov.uk/components/summary-list/), without the card styling. Looking ahead, we could test the two variants with real users. Both versions are available in the prototype.
 
 <!-- SCREENSHOT PLACEHOLDER — duplicate as needed -->
 ![Screenshot described under image](screenshot-name.png)
@@ -60,7 +60,7 @@ The subject matter expert confirmed that the message to mark as read is the reas
 
 ### Shortening long update messages
 
-The reason for the last CPS update can be very long. We now show only the first few words, followed by a "Show more" button. When the text is opened, the full message is shown with a "Show less" button at the end.
+The reason for last CPS update can be very long. We now show only the first few words, followed by a "Show more" button. When the text is opened, the full message is shown with a "Show less" button at the end.
 
 We first tried the [details component](https://design-system.service.gov.uk/components/details/). It couldn't do what the design needed, because its toggle always sits before the content and can't move to the end of the text. Instead, we used a simple button that tells screen readers whether the text is expanded.
 
@@ -103,12 +103,10 @@ This confirmed what the final designs already showed: the same status always get
 
 *Caption: Cards with different statuses showing their actions*
 
-Describe the screenshot here. Include the page heading, what each section contains, and what the buttons and links say.
 <!-- END PLACEHOLDER -->
 
 ## What we have not resolved yet
 
-- **This is a layout prototype.** None of the actions are connected to real data yet, so we've confirmed how the cards look but not how they behave.
-- **Some statuses are untested.** Withdrawn, Abandoned and Re-opened currently show the same actions as New and In progress. That's a reasonable default, but we haven't confirmed it.
-- **We haven't chosen between the card and list versions.** Both are still available in the prototype.
-- **We haven't done user research on this design.** We'd like to test it with users, especially on action plans with a lot of items.
+- **This prototype focused on consistent patterns and components.** None of the actions are connected to real data yet, so we've confirmed how the cards look but not how their ongoing journeys resolve.
+
+- **We haven't done user research on this design.** We’d like to test it with users, especially on action plans with a lot of items. Furthermore, there is a bulk action journey that could be optimised.
